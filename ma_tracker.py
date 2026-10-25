@@ -221,67 +221,217 @@ def diff_alerts(cur: pd.DataFrame, prev_path: Path) -> list[str]:
 
 
 def _cls(v: float) -> str:
-    return "pos" if v > 0 else "neg"
+    return "pos" if v > 0 else "neg" if v < 0 else ""
+
+
+def _num(v, fmt: str = "{:+.1f}") -> str:
+    return "–" if v is None or (isinstance(v, float) and np.isnan(v)) else fmt.format(v)
+
+
+def _bar(v: float, scale: float = 30.0) -> str:
+    """以 0 為中心的小長條，±scale% 封頂"""
+    w = min(abs(v), scale) / scale * 50
+    side = "r" if v >= 0 else "l"
+    return f"<i class='bar'><i class='{side} {_cls(v)}' style='width:{w:.1f}%'></i></i>"
+
+
+RATING_PILL = {"🟢輕": ("lt", "賣壓輕"), "🟠中": ("md", "賣壓中"), "🔴重": ("hv", "賣壓重")}
+
+CSS = """
+:root{--bg:#f6f7f9;--card:#fff;--fg:#16181d;--mut:#6b7280;--line:#e7e9ee;--soft:#f1f3f6;
+--pos:#d6312f;--neg:#16a34a;--acc:#2563eb;--amb:#b45309;--ambbg:#fef3c7;--vio:#7c3aed;--viobg:#ede9fe;--accbg:#dbeafe}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1013;--card:#171a1f;--fg:#e8eaee;--mut:#8b93a1;--line:#262a31;--soft:#1e2228;
+--pos:#f05252;--neg:#34d399;--acc:#60a5fa;--amb:#fbbf24;--ambbg:#3a2c0d;--vio:#a78bfa;--viobg:#2a2140;--accbg:#172a4a}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:20px 16px 48px}
+.num,.px,.m,.stat b{font-variant-numeric:tabular-nums}
+header h1{font-size:22px;margin:0;letter-spacing:.02em}
+header .sub{color:var(--mut);font-size:13px;margin-top:4px}
+.pos{color:var(--pos)}.neg{color:var(--neg)}.mut{color:var(--mut)}.acc{color:var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:14px}
+h2{font-size:15px;margin:0 0 10px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+h2 small{font-weight:400;color:var(--mut);font-size:12px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.stat span{display:block;color:var(--mut);font-size:12px}.stat b{font-size:22px}
+.stat b small{font-size:13px;color:var(--mut);font-weight:500}
+.idx{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+.ix{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.ix .t{font-size:12px;color:var(--mut)}.ix .c{font-size:17px;font-weight:600;margin:2px 0}
+.ix .d{font-size:12px;display:flex;gap:10px;flex-wrap:wrap}.ix .d span{white-space:nowrap}
+.alert{border-color:var(--acc);background:var(--accbg)}
+.alert ul{margin:0;padding-left:18px}
+.sec{display:grid;grid-template-columns:minmax(120px,1.3fr) 100px minmax(120px,2fr) 60px;gap:6px 12px;align-items:center}
+.sec>div{padding:5px 0;border-bottom:1px solid var(--line)}
+.sec .hd{color:var(--mut);font-size:12px;border-bottom:1px solid var(--line)}
+.sec a{color:inherit;text-decoration:none}.sec a:hover{text-decoration:underline}
+.kn{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+.dots{display:flex;gap:2px}.dots i{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--pos)}
+.bar{position:relative;display:block;height:8px;background:var(--soft);border-radius:4px;min-width:60px}
+.bar::after{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--mut);opacity:.5}
+.bar i{position:absolute;top:0;bottom:0;border-radius:4px}
+.bar i.r{left:50%}.bar i.l{right:50%}
+.bar i.pos{background:var(--pos)}.bar i.neg{background:var(--neg)}
+.right{text-align:right}
+nav.chips{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0 8px;margin-top:8px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+nav.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer;text-decoration:none;font-family:inherit}
+.chip.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.chip.sep{border:none;background:none;padding:5px 2px;color:var(--line);cursor:default}
+.rows .row{display:grid;grid-template-columns:minmax(130px,1.6fr) 84px 58px 120px 40px 52px 58px 40px 40px 46px 132px;gap:0 8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.rows .row:last-child{border-bottom:none}
+.rows .hdr{color:var(--mut);font-size:12px;padding-top:0}
+.ms{display:contents}
+.m,.px{text-align:right}
+.m60{display:flex;align-items:center;gap:6px;justify-content:flex-end}.m60 .bar{flex:1}
+.nm b{display:block;font-weight:600}.nm span{color:var(--mut);font-size:12px}
+.pill{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.pill.lt{background:var(--soft);color:var(--mut)}
+.pill.md{background:var(--ambbg);color:var(--amb)}
+.pill.hv{background:var(--viobg);color:var(--vio);font-weight:600}
+.pill.ok{background:var(--accbg);color:var(--acc);font-weight:600}
+.st{display:flex;gap:4px;justify-content:flex-end;flex-wrap:wrap}
+details{margin-top:18px;color:var(--mut);font-size:13px}
+details summary{cursor:pointer}
+section.cat{scroll-margin-top:56px}
+footer{margin-top:14px;color:var(--mut);font-size:12px}
+footer a{color:var(--acc)}
+@media(max-width:760px){
+ .stats,.idx{grid-template-columns:repeat(2,1fr)}
+ .sec{grid-template-columns:minmax(0,1.3fr) 44px minmax(0,1fr) 44px;gap:4px 8px;font-size:13px}
+ .dots{display:none}
+ .sec .hd{white-space:nowrap;font-size:11px}
+ .ix .d{font-size:11px;gap:6px}
+ .rows .hdr{display:none}
+ .rows .row{grid-template-columns:1fr auto;gap:6px 8px;padding:10px 0}
+ .nm{grid-column:1;grid-row:1/3}.px{grid-column:2;grid-row:1;font-size:15px;font-weight:600}
+ .ms{display:grid;grid-column:1/-1;grid-row:3;grid-template-columns:repeat(4,1fr);gap:4px 8px}
+ .m{text-align:left;font-size:13px}
+ .m::before{content:attr(data-l);display:block;color:var(--mut);font-size:11px}
+ .m60{display:block}.m60 .bar{margin-top:3px;min-width:0}
+ .st{grid-column:2;grid-row:2}
+}
+"""
+
+JS = """
+const btns=document.querySelectorAll('[data-f]');
+btns.forEach(b=>b.onclick=()=>{
+  btns.forEach(x=>x.classList.toggle('on',x===b));
+  const f=b.dataset.f;
+  document.querySelectorAll('section.cat').forEach(s=>{
+    let n=0;
+    s.querySelectorAll('.row[data-t]').forEach(r=>{
+      const ok=f==='all'||r.dataset[f]==='1';r.hidden=!ok;if(ok)n++;});
+    s.hidden=!n;
+  });
+});
+"""
 
 
 def write_html(df: pd.DataFrame, summ: pd.DataFrame, alerts: list[str],
                failed: list[str], path: Path) -> None:
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
+    esc = html.escape
+    stocks = df[df["category"] != "指數"]
+    n_all, n60 = len(stocks), int(stocks["above60"].sum())
+    n_ok = int((stocks["entry_ok"] == "✅").sum())
+    n_hv = int((stocks["rating"] == "🔴重").sum())
+    data_date = df["date"].max()
+
     parts = [f"""<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>均線追蹤 {now}</title><style>
-:root{{--bg:#fff;--fg:#1a1a1a;--mut:#666;--line:#e5e5e5;--pos:#c62828;--neg:#1b7f3b;--card:#f7f7f7}}
-@media(prefers-color-scheme:dark){{:root{{--bg:#121212;--fg:#eee;--mut:#999;--line:#333;--card:#1e1e1e;--pos:#ef5350;--neg:#66bb6a}}}}
-body{{background:var(--bg);color:var(--fg);font:14px/1.45 -apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;margin:0;padding:12px 16px}}
-h1{{font-size:18px;margin:4px 0}} h2{{font-size:15px;margin:18px 0 6px;border-left:4px solid var(--mut);padding-left:8px}}
-.mut{{color:var(--mut);font-size:12px}} .wrap{{overflow-x:auto}}
-table{{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}}
-th,td{{padding:5px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}}
-th:first-child,td:first-child{{text-align:left;position:sticky;left:0;background:var(--bg)}}
-th{{font-size:12px;color:var(--mut);font-weight:600}}
-.pos{{color:var(--pos)}} .neg{{color:var(--neg)}}
-.card{{background:var(--card);border-radius:8px;padding:8px 10px;margin:8px 0}}
-</style></head><body>
-<h1>主題股均線追蹤</h1><div class="mut">更新 {now}｜紅=在均線上 綠=在均線下（台股慣例）｜僅數據整理，非投資建議</div>"""]
+<title>主題股均線追蹤</title><style>{CSS}</style></head><body><div class="wrap">
+<header><h1>主題股均線追蹤</h1>
+<div class="sub">資料日 {data_date}｜更新 {now}（台北）｜紅＝在均線上、綠＝在均線下</div></header>
+<div class="stats">
+<div class="stat"><span>站上 60MA</span><b>{n60}<small> / {n_all}</small></b></div>
+<div class="stat"><span>符合進場</span><b class="acc">{n_ok}</b></div>
+<div class="stat"><span>賣壓重</span><b>{n_hv}</b></div>
+<div class="stat"><span>今日變化</span><b>{len(alerts)}</b></div>
+</div>"""]
+
+    idx = df[df["category"] == "指數"]
+    if not idx.empty:
+        parts.append('<div class="idx">')
+        for _, r in idx.iterrows():
+            parts.append(
+                f"<div class='ix'><div class='t'>{esc(r['name'])}</div>"
+                f"<div class='c'>{r['close']:,.2f}</div><div class='d'>"
+                f"<span>距60 <b class='{_cls(r['vs60'])}'>{r['vs60']:+.1f}%</b></span>"
+                f"<span>20日 <b class='{_cls(r['ret20'])}'>{r['ret20']:+.1f}%</b></span></div></div>")
+        parts.append("</div>")
 
     if alerts:
-        parts.append('<div class="card"><b>今日變化</b><br>' +
-                     "<br>".join(html.escape(a) for a in alerts) + "</div>")
+        parts.append('<div class="card alert"><h2>今日變化</h2><ul>' +
+                     "".join(f"<li>{esc(a)}</li>" for a in alerts) + "</ul></div>")
 
-    parts.append("<h2>類股強弱</h2><div class='wrap'><table><tr><th>分類</th>"
-                 "<th>檔數</th><th>站上60</th><th>站上20</th><th>平均距60%</th><th>🔴</th></tr>")
+    cats = [c for c in WATCHLIST if c != "指數" and (df["category"] == c).any()]
+    parts.append("<div class='card'><h2>類股強弱 <small>依平均距60MA排序</small></h2><div class='sec'>"
+                 "<div class='hd'>分類</div><div class='hd right'>站上60</div>"
+                 "<div class='hd'>平均距60MA</div><div class='hd right'>%</div>")
     for cat, r in summ.iterrows():
-        parts.append(f"<tr><td>{html.escape(cat)}</td><td>{r['檔數']}</td>"
-                     f"<td>{r['站上60MA']}</td><td>{r['站上20MA']}</td>"
-                     f"<td class='{_cls(r['平均距60MA%'])}'>{r['平均距60MA%']:+.1f}</td>"
-                     f"<td>{r['🔴重']}</td></tr>")
-    parts.append("</table></div>")
+        k, n, avg = int(r["站上60MA"]), int(r["檔數"]), float(r["平均距60MA%"])
+        dots = "".join(f"<i class='{'on' if i < k else ''}'></i>" for i in range(n))
+        parts.append(
+            f"<div><a href='#c{cats.index(cat)}'>{esc(cat)}</a></div>"
+            f"<div class='kn'><span class='dots'>{dots}</span><span class='mut num'>{k}/{n}</span></div>"
+            f"<div>{_bar(avg)}</div><div class='right num {_cls(avg)}'>{avg:+.1f}</div>")
+    parts.append("</div></div>")
 
-    for cat in WATCHLIST:
+    parts.append("<nav class='chips'>"
+                 "<button class='chip on' data-f='all'>全部</button>"
+                 "<button class='chip' data-f='ok'>可進場</button>"
+                 "<button class='chip' data-f='up'>站上60</button>"
+                 "<button class='chip' data-f='hv'>賣壓重</button><span class='chip sep'>|</span>" +
+                 "".join(f"<a class='chip' href='#c{i}'>{esc(c)}</a>" for i, c in enumerate(cats)) +
+                 "</nav>")
+
+    hdr = ("<div class='row hdr'><div>股票</div><div class='px'>收盤</div>"
+           "<div class='m'>距20%</div><div class='m'>距60%</div><div class='m'>60MA</div>"
+           "<div class='m'>距高%</div><div class='m'>20日%</div><div class='m'>RSI</div>"
+           "<div class='m'>出貨</div><div class='m'>量比</div><div class='st'>狀態</div></div>")
+    for i, cat in enumerate(cats):
         sub = df[df["category"] == cat]
-        if sub.empty:
-            continue
-        parts.append(f"<h2>{html.escape(cat)}</h2><div class='wrap'><table><tr>"
-                     "<th>股票</th><th>收盤</th><th>距20%</th><th>距60%</th><th>60MA</th>"
-                     "<th>距高%</th><th>20日%</th><th>RSI</th><th>出貨</th><th>量比</th>"
-                     "<th>賣壓</th><th>進場</th></tr>")
+        k = int(sub["above60"].sum())
+        parts.append(f"<section class='cat card' id='c{i}'><h2>{esc(cat)} "
+                     f"<small>站上60 {k}/{len(sub)}｜平均距60 {sub['vs60'].mean():+.1f}%</small></h2>"
+                     f"<div class='rows'>{hdr}")
         for _, r in sub.iterrows():
+            cls, label = RATING_PILL.get(r["rating"], ("lt", r["rating"]))
+            ok = r["entry_ok"] == "✅"
+            pills = (f"<span class='pill {cls}'>{label}</span>" +
+                     ("<span class='pill ok'>可進場</span>" if ok else ""))
             parts.append(
-                f"<tr><td>{html.escape(r['name'])}<br><span class='mut'>{html.escape(r['ticker'])}</span></td>"
-                f"<td>{r['close']:,}</td>"
-                f"<td class='{_cls(r['vs20'])}'>{r['vs20']:+.1f}</td>"
-                f"<td class='{_cls(r['vs60'])}'>{r['vs60']:+.1f}</td>"
-                f"<td>{r['ma60_dir']}</td><td>{r['dd_1y']:.0f}</td>"
-                f"<td class='{_cls(r['ret20'])}'>{r['ret20']:+.1f}</td>"
-                f"<td>{r['rsi']:.0f}</td><td>{r['dist_days']}</td><td>{r['vol_ratio']}</td>"
-                f"<td>{r['rating']}</td><td>{r['entry_ok']}</td></tr>")
-        parts.append("</table></div>")
+                f"<div class='row' data-t='1' data-ok='{int(ok)}' data-up='{int(r['above60'])}' "
+                f"data-hv='{int(cls == 'hv')}'>"
+                f"<div class='nm'><b>{esc(r['name'])}</b>"
+                f"{'' if r['name'] == r['ticker'] else '<span>' + esc(r['ticker']) + '</span>'}</div>"
+                f"<div class='px'>{r['close']:,.2f}</div><div class='ms'>"
+                f"<div class='m {_cls(r['vs20'])}' data-l='距20MA'>{r['vs20']:+.1f}</div>"
+                f"<div class='m m60' data-l='距60MA'><span class='v {_cls(r['vs60'])}'>{r['vs60']:+.1f}</span>{_bar(r['vs60'])}</div>"
+                f"<div class='m' data-l='60MA'>{r['ma60_dir']}</div>"
+                f"<div class='m' data-l='距高'>{r['dd_1y']:.0f}</div>"
+                f"<div class='m {_cls(r['ret20'])}' data-l='20日'>{r['ret20']:+.1f}</div>"
+                f"<div class='m' data-l='RSI'>{r['rsi']:.0f}</div>"
+                f"<div class='m' data-l='出貨'>{int(r['dist_days'])}</div>"
+                f"<div class='m' data-l='量比'>{_num(r['vol_ratio'], '{:.2f}')}</div></div>"
+                f"<div class='st'>{pills}</div></div>")
+        parts.append("</div></section>")
 
-    parts.append("<p class='mut'>出貨＝近25日收黑且量增的天數；量比＝近5日均量/前50日均量；"
-                 "進場✅＝站上60MA且RSI&lt;70。資料：Yahoo Finance。</p>")
+    parts.append("""<details><summary>指標說明</summary><p>
+距20%／距60%：收盤相對 20／60 日均線的距離。60MA：近 5 日均線方向。距高%：距一年高點。<br>
+出貨：近 25 日收黑且量增的天數。量比：近 5 日均量 ÷ 前 50 日均量。<br>
+賣壓輕＝站上 60MA；賣壓中＝跌破 60MA；賣壓重＝跌破 60MA 且 60MA 下彎、距一年高點跌逾 30%。<br>
+可進場＝站上 60MA 且 RSI14 &lt; 70。</p></details>""")
     if failed:
-        parts.append(f"<p class='mut'>抓取失敗：{html.escape(', '.join(failed))}</p>")
-    parts.append("</body></html>")
+        parts.append(f"<p class='mut'>抓取失敗：{esc(', '.join(failed))}</p>")
+    parts.append("<footer>資料：Yahoo Finance｜<a href='latest.csv'>下載 CSV</a>｜"
+                 "<a href='https://github.com/filcoabs-MUR/ma-tracker/blob/main/output/history.csv'>歷史紀錄</a>"
+                 "｜僅數據整理，非投資建議</footer>")
+    parts.append(f"</div><script>{JS}</script></body></html>")
     path.write_text("\n".join(parts), encoding="utf-8")
 
 # ───────────────────────── 主程式 ─────────────────────────
