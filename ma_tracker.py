@@ -49,7 +49,7 @@ WATCHLIST: dict[str, dict[str, str]] = {
     "CPU": {
         "AMD": "AMD", "INTC": "Intel", "ARM": "Arm",
     },
-    "CPU載板": {
+    "載板": {
         "4062.T": "Ibiden", "3037.TW": "欣興", "3189.TW": "景碩", "ATS.VI": "AT&S",
     },
     "記憶體/儲存": {
