@@ -9,7 +9,7 @@ ma_tracker.py — 主題股均線 / 賣壓追蹤（每日盤後更新）
   🟢輕  站上60MA
   🟠中  跌破60MA，但60MA仍上揚（或跌幅未達-30%）
   🔴重  跌破60MA + 60MA下彎 + 距一年高點跌逾30%
-進場條件(建倉規則)：站上60MA 且 RSI14 < 70 → ✅
+篩選條件：站上60MA 且 RSI14 < 70 → ✅（欄位 entry_ok）
 
 輸出（皆在 ./output/）：
   latest.html          手機好讀的分類報表
@@ -348,7 +348,7 @@ def write_html(df: pd.DataFrame, summ: pd.DataFrame, alerts: list[str],
 <div class="sub">資料日 {data_date}｜更新 {now}（台北）｜紅＝在均線上、綠＝在均線下</div></header>
 <div class="stats">
 <div class="stat"><span>站上 60MA</span><b>{n60}<small> / {n_all}</small></b></div>
-<div class="stat"><span>符合進場</span><b class="acc">{n_ok}</b></div>
+<div class="stat"><span>符合條件</span><b class="acc">{n_ok}</b></div>
 <div class="stat"><span>賣壓重</span><b>{n_hv}</b></div>
 <div class="stat"><span>今日變化</span><b>{len(alerts)}</b></div>
 </div>"""]
@@ -383,7 +383,7 @@ def write_html(df: pd.DataFrame, summ: pd.DataFrame, alerts: list[str],
 
     parts.append("<nav class='chips'>"
                  "<button class='chip on' data-f='all'>全部</button>"
-                 "<button class='chip' data-f='ok'>可進場</button>"
+                 "<button class='chip' data-f='ok'>符合條件</button>"
                  "<button class='chip' data-f='up'>站上60</button>"
                  "<button class='chip' data-f='hv'>賣壓重</button><span class='chip sep'>|</span>" +
                  "".join(f"<a class='chip' href='#c{i}'>{esc(c)}</a>" for i, c in enumerate(cats)) +
@@ -403,7 +403,7 @@ def write_html(df: pd.DataFrame, summ: pd.DataFrame, alerts: list[str],
             cls, label = RATING_PILL.get(r["rating"], ("lt", r["rating"]))
             ok = r["entry_ok"] == "✅"
             pills = (f"<span class='pill {cls}'>{label}</span>" +
-                     ("<span class='pill ok'>可進場</span>" if ok else ""))
+                     ("<span class='pill ok'>符合條件</span>" if ok else ""))
             parts.append(
                 f"<div class='row' data-t='1' data-ok='{int(ok)}' data-up='{int(r['above60'])}' "
                 f"data-hv='{int(cls == 'hv')}'>"
@@ -425,7 +425,7 @@ def write_html(df: pd.DataFrame, summ: pd.DataFrame, alerts: list[str],
 距20%／距60%：收盤相對 20／60 日均線的距離。60MA：近 5 日均線方向。距高%：距一年高點。<br>
 出貨：近 25 日收黑且量增的天數。量比：近 5 日均量 ÷ 前 50 日均量。<br>
 賣壓輕＝站上 60MA；賣壓中＝跌破 60MA；賣壓重＝跌破 60MA 且 60MA 下彎、距一年高點跌逾 30%。<br>
-可進場＝站上 60MA 且 RSI14 &lt; 70。</p></details>""")
+符合條件＝站上 60MA 且 RSI14 &lt; 70，僅為篩選條件，非買賣建議。</p></details>""")
     if failed:
         parts.append(f"<p class='mut'>抓取失敗：{esc(', '.join(failed))}</p>")
     parts.append("<footer>資料：Yahoo Finance｜<a href='latest.csv'>下載 CSV</a>｜"
