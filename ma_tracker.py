@@ -80,7 +80,7 @@ WATCHLIST: dict[str, dict[str, str]] = {
     "軟體/資安/Agent": {
         "PLTR": "Palantir", "NET": "Cloudflare", "CRWD": "CrowdStrike", "PANW": "Palo Alto",
     },
-    "大型科技": {
+    "大型科技CSP": {
         "MSFT": "Microsoft", "AAPL": "Apple", "AMZN": "Amazon", "GOOG": "Google", "META": "Meta",
         "TSLA": "Tesla",
     },
