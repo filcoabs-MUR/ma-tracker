@@ -77,14 +77,12 @@ WATCHLIST: dict[str, dict[str, str]] = {
     "伺服器/EMS": {
         "CLS": "Celestica",
     },
-    "CSP": {
-        "MSFT": "Microsoft",
-    },
     "軟體/資安/Agent": {
         "PLTR": "Palantir", "NET": "Cloudflare", "CRWD": "CrowdStrike", "PANW": "Palo Alto",
     },
     "大型科技": {
-        "AAPL": "Apple", "AMZN": "Amazon", "GOOG": "Google", "META": "Meta", "TSLA": "Tesla",
+        "MSFT": "Microsoft", "AAPL": "Apple", "AMZN": "Amazon", "GOOG": "Google", "META": "Meta",
+        "TSLA": "Tesla",
     },
 }
 # 註：Samtec 為未上市公司，無法追蹤。
