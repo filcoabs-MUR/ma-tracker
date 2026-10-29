@@ -1,2 +1,6 @@
-⬇️ 新跌破60MA  加權指數(^TWII)  距60MA -0.3%
-⬇️ 新跌破60MA  欣興(3037.TW)  距60MA -1.2%
+⬇️ 新跌破60MA  S&P500 VOO(VOO)  距60MA -0.0%
+⬇️ 新跌破60MA  那斯達克100(^NDX)  距60MA -1.4%
+⬇️ 新跌破60MA  Micron(MU)  距60MA -1.8%
+⬆️ 新站上60MA  Lumentum(LITE)  距60MA +1.5%
+⬇️ 新跌破60MA  Marvell(MRVL)  距60MA -7.8%
+⬇️ 新跌破60MA  Cloudflare(NET)  距60MA -4.3%
