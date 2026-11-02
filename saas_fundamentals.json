@@ -1,6 +1,6 @@
 {
   "category": "軟體/資安/Agent",
-  "updated": "2026-11-02",
+  "updated": "2026-11-03",
   "note": "財報數字為手動更新；EV 每次執行用最新收盤重算。Billings 為計算值（TTM 營收＋遞延收入年增），四家都未在財報列出此數字。",
   "companies": {
     "CRWD": {
@@ -49,25 +49,25 @@
     },
     "PLTR": {
       "name": "Palantir",
-      "period": "2026 Q2（至 2026/6）",
-      "next_report": "2026-11-02 盤後",
-      "shares_m": 2403.06,
-      "net_cash_m": 9200,
+      "period": "2026 Q3（至 2026/9）",
+      "next_report": "約 2027 年 2 月（日期未公布）",
+      "shares_m": 2405.72,
+      "net_cash_m": 10400,
       "fcf": [
-        {"fy": "2026", "end": "2026-12-31", "m": 4616, "src": "MarketScreener 預估"},
-        {"fy": "2027", "end": "2027-12-31", "m": 7058, "src": "MarketScreener 預估"}
+        {"fy": "2026", "end": "2026-12-31", "m": 4900, "src": "公司指引中值（$4.8B～$5.0B）"},
+        {"fy": "2027", "end": "2027-12-31", "m": 7047, "src": "MarketScreener 預估（可能尚未反映 Q3）"}
       ],
       "metrics": {
-        "RPO": "$4.9B｜+103%（RDV $13.1B｜+83%）",
+        "RPO": "$4.9B｜+88%，季持平（RDV $13.4B｜+55%，季增 2%）",
         "cRPO": "未揭露",
-        "Billings TTM": "約 $6.54B",
-        "遞延收入 YoY": "+55%（含客戶預付款）",
-        "NRR": "157%（季增 7 點）",
-        "NNARR": "未揭露 ARR；單季營收年化增量約 $1.21B",
-        "SBC／營收": "13.6%"
+        "Billings TTM": "約 $7.77B",
+        "遞延收入 YoY": "+65%（含客戶預付款）",
+        "NRR": "165%（季增 8 點）",
+        "NNARR": "未揭露 ARR；單季營收年化增量約 $1.51B",
+        "SBC／營收": "13.5%"
       },
       "ai_tag": "新增為主",
-      "ai": "四家中最接近純新增：美國商業營收 +149%，客戶數只 +35%，NRR 157%，成長來自既有客戶擴大用量與新買家。但管理層沒有正面回答是否取代既有軟體廠商，所以「別家的舊營收被它吃掉多少」仍不可知。"
+      "ai": "四家中最接近純新增：美國商業營收 +148%，美國商業客戶只 +29%，NRR 165%，成長來自既有客戶擴大用量與新買家。但 RPO 與 RDV 較上季幾乎持平，成交 TCV 只 +6%，營收成長快於新簽約，要看是否延續。是否取代既有軟體廠商未見正面說明，「別家的舊營收被它吃掉多少」仍不可知。"
     },
     "PANW": {
       "name": "Palo Alto",
@@ -106,8 +106,8 @@
     {"t": "Palo Alto 法說逐字稿", "u": "https://www.fool.com/earnings/call-transcripts/2026/09/08/palo-alto-networks-panw-q4-2026-earnings-call-transcript/"},
     {"t": "Cloudflare Q2 2026 8-K", "u": "https://www.sec.gov/Archives/edgar/data/0001477333/000147733326000053/q226exhibit991.htm"},
     {"t": "Cloudflare FCF 預估（MarketScreener）", "u": "https://www.marketscreener.com/quote/stock/CLOUDFLARE-INC-65956823/finances/"},
-    {"t": "Palantir Q2 2026 8-K", "u": "https://www.sec.gov/Archives/edgar/data/0001321655/000132165526000039/a2026q2ex991pressrelease.htm"},
-    {"t": "Palantir 法說逐字稿", "u": "https://www.fool.com/earnings/call-transcripts/2026/08/10/palantir-pltr-q2-2026-earnings-call-transcript/"},
+    {"t": "Palantir Q3 2026 8-K", "u": "https://www.sec.gov/Archives/edgar/data/0001321655/000132165526000045/a2026q3ex991pressrelease.htm"},
+    {"t": "Palantir Q3 法說逐字稿", "u": "https://www.investing.com/news/transcripts/earnings-call-transcript-palantir-tops-q3-2026-estimates-but-shares-fall-93CH-4993152"},
     {"t": "Palantir FCF 預估（MarketScreener）", "u": "https://ca.marketscreener.com/quote/stock/PALANTIR-TECHNOLOGIES-INC-113108869/finances/"}
   ]
 }
