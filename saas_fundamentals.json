@@ -1,0 +1,113 @@
+{
+  "category": "軟體/資安/Agent",
+  "updated": "2026-11-02",
+  "note": "財報數字為手動更新；EV 每次執行用最新收盤重算。Billings 為計算值（TTM 營收＋遞延收入年增），四家都未在財報列出此數字。",
+  "companies": {
+    "CRWD": {
+      "name": "CrowdStrike",
+      "period": "FY27 Q2（至 2026/7）",
+      "next_report": "尚未查到日期",
+      "shares_m": 1023.93,
+      "net_cash_m": 4270,
+      "fcf": [
+        {"fy": "FY27", "end": "2027-01-31", "m": 1866, "src": "使用者提供"},
+        {"fy": "FY28", "end": "2028-01-31", "m": 2507, "src": "使用者提供"}
+      ],
+      "metrics": {
+        "RPO": "$10.7B｜+49%",
+        "cRPO": "約 $4.9B（推算）",
+        "Billings TTM": "約 $6.40B",
+        "遞延收入 YoY": "+26%",
+        "NRR": "未揭露數字（較上季升）",
+        "NNARR": "$333M｜+51%",
+        "SBC／營收": "23.1%"
+      },
+      "ai_tag": "AI 占比小",
+      "ai": "AIDR 另外計價、按 token 收費，ARR 較上季近 3 倍，但未揭露金額。成長主力仍是取代競品舊產品（傳統防毒、SIEM）與 Flex 轉換（ARR 平均提升逾 40%）。這是搶市占，還不是 AI 新預算。法說會未談席次收費被 AI 侵蝕的風險。"
+    },
+    "NET": {
+      "name": "Cloudflare",
+      "period": "2026 Q2（至 2026/6）",
+      "next_report": "2026-11-05 盤後",
+      "shares_m": 356.08,
+      "net_cash_m": 893,
+      "fcf": [
+        {"fy": "2026", "end": "2026-12-31", "m": 347.4, "src": "MarketScreener 預估"},
+        {"fy": "2027", "end": "2027-12-31", "m": 555.7, "src": "MarketScreener 預估"}
+      ],
+      "metrics": {
+        "RPO": "$2.73B｜+38%",
+        "cRPO": "+35%（金額未揭露）",
+        "Billings TTM": "約 $2.78B",
+        "遞延收入 YoY": "+46%",
+        "NRR": "120%（年增 6 點）",
+        "NNARR": "未揭露 ARR；單季營收年化增量約 $224M",
+        "SBC／營收": "20.2%"
+      },
+      "ai_tag": "偏新增，未量化",
+      "ai": "網路流量已過半非人類，NRR 回升到 120%，方向上偏新增用量。但未揭露 AI 營收，唯一具體案例是一張一年 $750 萬的生成式 AI 合約。FCF 利潤率約 8%～11%，四家最低，估值最依賴未來利潤率提升。"
+    },
+    "PLTR": {
+      "name": "Palantir",
+      "period": "2026 Q2（至 2026/6）",
+      "next_report": "2026-11-02 盤後",
+      "shares_m": 2403.06,
+      "net_cash_m": 9200,
+      "fcf": [
+        {"fy": "2026", "end": "2026-12-31", "m": 4616, "src": "MarketScreener 預估"},
+        {"fy": "2027", "end": "2027-12-31", "m": 7058, "src": "MarketScreener 預估"}
+      ],
+      "metrics": {
+        "RPO": "$4.9B｜+103%（RDV $13.1B｜+83%）",
+        "cRPO": "未揭露",
+        "Billings TTM": "約 $6.54B",
+        "遞延收入 YoY": "+55%（含客戶預付款）",
+        "NRR": "157%（季增 7 點）",
+        "NNARR": "未揭露 ARR；單季營收年化增量約 $1.21B",
+        "SBC／營收": "13.6%"
+      },
+      "ai_tag": "新增為主",
+      "ai": "四家中最接近純新增：美國商業營收 +149%，客戶數只 +35%，NRR 157%，成長來自既有客戶擴大用量與新買家。但管理層沒有正面回答是否取代既有軟體廠商，所以「別家的舊營收被它吃掉多少」仍不可知。"
+    },
+    "PANW": {
+      "name": "Palo Alto",
+      "period": "FY26 Q4（至 2026/7）",
+      "next_report": "尚未查到日期",
+      "shares_m": 818.44,
+      "net_cash_m": 6130,
+      "fcf": [
+        {"fy": "FY27", "end": "2027-07-31", "m": 5538, "src": "使用者提供"},
+        {"fy": "FY28", "end": "2028-07-31", "m": 6866, "src": "使用者提供"}
+      ],
+      "metrics": {
+        "RPO": "$21.2B｜+34%",
+        "cRPO": "$9.3B｜+34%",
+        "Billings TTM": "約 $13.48B（含併購）",
+        "遞延收入 YoY": "+16%（含併購）",
+        "NRR": "全公司未揭露；平台化客戶 >120%",
+        "NNARR": "約 $970M｜+98%（含九位數一次性遷移）",
+        "SBC／營收": "15.5%"
+      },
+      "ai_tag": "併購墊高，AI 約 1%",
+      "ai": "NGS ARR +63% 含 CyberArk、Chronosphere 等併購，公司未拆有機成長。明確屬於 AI 的 Prisma AIRS 約 $100M，占 NGS ARR $9.1B 約 1%。FY27 指引 NGS ARR +22%～23%、RPO +19%～20%，比帳面成長低很多，才是接近有機的參考。"
+    }
+  },
+  "takeaway": [
+    "估值高低要配成長看：PLTR 與 NET 的 FCF 成長最快，但 NET 的 NTM 倍數也最高；PANW 倍數最低、成長也最低。",
+    "AI 帶來新增營收的證據，PLTR 最強、NET 次之但未量化；CRWD 與 PANW 可明確歸於 AI 的金額仍小。",
+    "目前看不到自家舊營收被 AI 取代：有揭露的留存率都在上升。但只有 NET、PLTR 揭露全公司 NRR 數字，CRWD、PANW 無法驗證。",
+    "以上 FCF 都未扣員工股票酬勞（SBC），SBC 占營收 14%～23%，扣掉後倍數會明顯更高。"
+  ],
+  "sources": [
+    {"t": "CrowdStrike Q2 FY27 新聞稿", "u": "https://ir.crowdstrike.com/news-releases/news-release-details/crowdstrike-reports-second-quarter-fiscal-year-2027-financial"},
+    {"t": "CrowdStrike 法說逐字稿", "u": "https://www.fool.com/earnings/call-transcripts/2026/08/31/crowdstrike-crwd-q2-2027-earnings-call-transcript/"},
+    {"t": "CrowdStrike RPO（第三方讀 10-Q）", "u": "https://sec-api.io/insights/crowdstrike-crwd-valuation-and-financials-q2-fy2027-arr-growth-stock-split-insider-sales-outage-litigation-and-scenarios-to-fy2030"},
+    {"t": "Palo Alto Q4 FY26 新聞稿", "u": "https://www.paloaltonetworks.com/company/press/2026/palo-alto-networks-reports-fiscal-fourth-quarter-and-fiscal-year-2026-financial-results"},
+    {"t": "Palo Alto 法說逐字稿", "u": "https://www.fool.com/earnings/call-transcripts/2026/09/08/palo-alto-networks-panw-q4-2026-earnings-call-transcript/"},
+    {"t": "Cloudflare Q2 2026 8-K", "u": "https://www.sec.gov/Archives/edgar/data/0001477333/000147733326000053/q226exhibit991.htm"},
+    {"t": "Cloudflare FCF 預估（MarketScreener）", "u": "https://www.marketscreener.com/quote/stock/CLOUDFLARE-INC-65956823/finances/"},
+    {"t": "Palantir Q2 2026 8-K", "u": "https://www.sec.gov/Archives/edgar/data/0001321655/000132165526000039/a2026q2ex991pressrelease.htm"},
+    {"t": "Palantir 法說逐字稿", "u": "https://www.fool.com/earnings/call-transcripts/2026/08/10/palantir-pltr-q2-2026-earnings-call-transcript/"},
+    {"t": "Palantir FCF 預估（MarketScreener）", "u": "https://ca.marketscreener.com/quote/stock/PALANTIR-TECHNOLOGIES-INC-113108869/finances/"}
+  ]
+}

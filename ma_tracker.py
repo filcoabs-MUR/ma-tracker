@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import html
+import json
 import sys
 import time
 import webbrowser
@@ -40,6 +41,7 @@ import yfinance as yf
 BASE = Path(__file__).resolve().parent
 OUT = BASE / "output"
 DAILY = OUT / "daily"
+FUNDAMENTALS = BASE / "saas_fundamentals.json"
 
 # ───────────────────────── 追蹤清單（分類） ─────────────────────────
 WATCHLIST: dict[str, dict[str, str]] = {
@@ -297,6 +299,21 @@ nav.chips::-webkit-scrollbar{display:none}
 details{margin-top:18px;color:var(--mut);font-size:13px}
 details summary{cursor:pointer}
 section.cat{scroll-margin-top:56px}
+details.fund{margin-top:12px;border-top:1px solid var(--line);padding-top:10px;color:var(--fg);font-size:14px}
+details.fund>summary{font-weight:600;color:var(--acc)}
+.ftw{overflow-x:auto;margin-top:10px}
+.hint{display:none;color:var(--mut);font-size:12px;margin-top:8px}
+.ft{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+.ft th,.ft td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;min-width:92px}
+.ft th{font-size:12px;color:var(--fg)}
+.ft td:first-child,.ft th:first-child{position:sticky;left:0;background:var(--card);color:var(--mut);font-weight:400;min-width:88px}
+.ft tr.grp td{color:var(--mut);font-size:12px;background:var(--soft);font-weight:600}
+.ft tr.grp td:first-child{background:var(--soft)}
+.ft b{font-size:15px}
+.ai{margin-top:12px}.ai div{padding:8px 0;border-bottom:1px solid var(--line)}
+.ai b{margin-right:6px}
+.fn{color:var(--mut);font-size:12px;margin-top:10px}.fn a{color:var(--acc)}
+.tk{margin:10px 0 0;padding-left:18px}.tk li{margin:4px 0}
 footer{margin-top:14px;color:var(--mut);font-size:12px}
 footer a{color:var(--acc)}
 @media(max-width:760px){
@@ -304,6 +321,8 @@ footer a{color:var(--acc)}
  .sec{grid-template-columns:minmax(0,1.3fr) 44px minmax(0,1fr) 44px;gap:4px 8px;font-size:13px}
  .dots{display:none}
  .sec .hd{white-space:nowrap;font-size:11px}
+ .hint{display:block}
+ .ftw{margin-top:4px}
  .ix .d{font-size:11px;gap:6px}
  .rows .hdr{display:none}
  .rows .row{grid-template-columns:1fr auto;gap:6px 8px;padding:10px 0}
@@ -329,6 +348,83 @@ btns.forEach(b=>b.onclick=()=>{
   });
 });
 """
+
+
+def _ntm_fcf(fcf: list[dict], today: pd.Timestamp) -> float | None:
+    """依距財年結束的月數，把前後兩個財年 FCF 加權成未來 12 個月"""
+    for a, b in zip(fcf, fcf[1:]):
+        end = pd.Timestamp(a["end"])
+        if end > today:
+            w = min((end - today).days / 365.0, 1.0)
+            return a["m"] * w + b["m"] * (1 - w)
+    return None
+
+
+def saas_section(df: pd.DataFrame) -> tuple[str, str]:
+    """回傳 (所屬分類, 可展開區塊 HTML)；資料檔不存在時回傳空字串"""
+    if not FUNDAMENTALS.exists():
+        return "", ""
+    f = json.loads(FUNDAMENTALS.read_text(encoding="utf-8"))
+    esc = html.escape
+    closes = df.set_index("ticker")["close"]
+    today = pd.Timestamp(datetime.now().date())
+    cos = {t: c for t, c in f["companies"].items() if t in closes.index}
+    if not cos:
+        return "", ""
+
+    val: dict[str, dict] = {}
+    for t, c in cos.items():
+        mcap = closes[t] * c["shares_m"]
+        ev = mcap - c["net_cash_m"]
+        a, b = c["fcf"][0], c["fcf"][1]
+        ntm = _ntm_fcf(c["fcf"], today)
+        g = (b["m"] / a["m"] - 1) * 100
+        val[t] = {
+            "市值": f"${mcap / 1000:,.1f}B", "淨現金": f"${c['net_cash_m'] / 1000:,.2f}B", "EV": f"${ev / 1000:,.1f}B",
+            "fy1": f"{ev / a['m']:.0f}x（{a['fy']}）", "fy2": f"{ev / b['m']:.0f}x（{b['fy']}）",
+            "ntm": f"{ev / ntm:.0f}x" if ntm else "–",
+            "g": f"{g:+.0f}%", "ng": f"{ev / ntm / g:.1f}" if ntm and g > 0 else "–",
+            "fcf": f"${a['m'] / 1000:.2f}B → ${b['m'] / 1000:.2f}B",
+        }
+
+    def row(label: str, cells: list[str]) -> str:
+        return f"<tr><td>{esc(label)}</td>" + "".join(f"<td>{x}</td>" for x in cells) + "</tr>"
+
+    def grp(label: str) -> str:
+        return f"<tr class='grp'><td colspan='{len(cos) + 1}'>{esc(label)}</td></tr>"
+
+    h = ["<details class='fund'><summary>展開 SaaS 基本面：RPO／cRPO／Billings／NRR／NNARR／EV/FCF</summary>",
+         "<div class='hint'>左右滑動看全部公司</div><div class='ftw'><table class='ft'><tr><th>指標</th>" +
+         "".join(f"<th>{esc(c['name'])}<br><span class='mut'>{esc(t)}</span></th>" for t, c in cos.items()) + "</tr>",
+         grp("估值（用最新收盤計算）"),
+         row("EV/NTM FCF", [f"<b>{val[t]['ntm']}</b>" for t in cos]),
+         row("EV/FCF 第 1 年", [val[t]["fy1"] for t in cos]),
+         row("EV/FCF 第 2 年", [val[t]["fy2"] for t in cos]),
+         row("FCF 預估", [val[t]["fcf"] for t in cos]),
+         row("FCF 成長", [val[t]["g"] for t in cos]),
+         row("NTM 倍數÷成長", [val[t]["ng"] for t in cos]),
+         row("EV", [val[t]["EV"] for t in cos]),
+         row("市值", [val[t]["市值"] for t in cos]),
+         row("淨現金", [val[t]["淨現金"] for t in cos]),
+         grp("營運指標")]
+    keys = list(next(iter(cos.values()))["metrics"])
+    h += [row(k, [esc(c["metrics"].get(k, "–")) for c in cos.values()]) for k in keys]
+    h.append(row("資料期別", [esc(c["period"]) for c in cos.values()]))
+    h.append(row("下次財報", [esc(c["next_report"]) for c in cos.values()]))
+    h.append("</table></div>")
+
+    h.append("<h2 style='margin-top:16px'>AI 是新增營收，還是取代舊營收？</h2><div class='ai'>")
+    for c in cos.values():
+        h.append(f"<div><b>{esc(c['name'])}</b><span class='pill md'>{esc(c['ai_tag'])}</span><br>{esc(c['ai'])}</div>")
+    h.append("</div><h2 style='margin-top:16px'>綜合評估</h2><ul class='tk'>" +
+             "".join(f"<li>{esc(x)}</li>" for x in f["takeaway"]) + "</ul>")
+    src = {c["fcf"][0]["src"]: 1 for c in cos.values()}
+    links = "、".join(f"<a href='{esc(s['u'])}' rel='noopener'>{esc(s['t'])}</a>" for s in f["sources"])
+    h.append(f"<p class='fn'>基本面更新 {esc(f['updated'])}。{esc(f['note'])}"
+             f"FCF 來源：{esc('、'.join(src))}。各家財年不同，「第 1／2 年」不在同一時間，跨公司比較請看 NTM。"
+             f"市值用基本股數，未計入員工選擇權等稀釋；Cloudflare 淨現金以可轉債帳面值計算。"
+             f"僅數據整理，非投資建議。</p><p class='fn'>來源：{links}</p></details>")
+    return f["category"], "".join(h)
 
 
 def write_html(df: pd.DataFrame, summ: pd.DataFrame, alerts: list[str],
@@ -389,6 +485,7 @@ def write_html(df: pd.DataFrame, summ: pd.DataFrame, alerts: list[str],
                  "".join(f"<a class='chip' href='#c{i}'>{esc(c)}</a>" for i, c in enumerate(cats)) +
                  "</nav>")
 
+    fund_cat, fund_html = saas_section(df)
     hdr = ("<div class='row hdr'><div>股票</div><div class='px'>收盤</div>"
            "<div class='m'>距20%</div><div class='m'>距60%</div><div class='m'>60MA</div>"
            "<div class='m'>距高%</div><div class='m'>20日%</div><div class='m'>RSI</div>"
@@ -419,7 +516,7 @@ def write_html(df: pd.DataFrame, summ: pd.DataFrame, alerts: list[str],
                 f"<div class='m' data-l='出貨'>{int(r['dist_days'])}</div>"
                 f"<div class='m' data-l='量比'>{_num(r['vol_ratio'], '{:.2f}')}</div></div>"
                 f"<div class='st'>{pills}</div></div>")
-        parts.append("</div></section>")
+        parts.append("</div>" + (fund_html if cat == fund_cat else "") + "</section>")
 
     parts.append("""<details><summary>指標說明</summary><p>
 距20%／距60%：收盤相對 20／60 日均線的距離。60MA：近 5 日均線方向。距高%：距一年高點。<br>
