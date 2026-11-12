@@ -251,6 +251,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,B
 .num,.px,.m,.stat b{font-variant-numeric:tabular-nums}
 header h1{font-size:22px;margin:0;letter-spacing:.02em}
 header .sub{color:var(--mut);font-size:13px;margin-top:4px}
+header .nav{font-size:14px;margin-top:6px}header .nav a{color:var(--acc);text-decoration:none}header .nav a:hover{text-decoration:underline}
 .pos{color:var(--pos)}.neg{color:var(--neg)}.mut{color:var(--mut)}.acc{color:var(--acc)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:14px}
 h2{font-size:15px;margin:0 0 10px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
@@ -441,7 +442,8 @@ def write_html(df: pd.DataFrame, summ: pd.DataFrame, alerts: list[str],
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>主題股均線追蹤</title><style>{CSS}</style></head><body><div class="wrap">
 <header><h1>主題股均線追蹤</h1>
-<div class="sub">資料日 {data_date}｜更新 {now}（台北）｜紅＝在均線上、綠＝在均線下</div></header>
+<div class="sub">資料日 {data_date}｜更新 {now}（台北）｜紅＝在均線上、綠＝在均線下</div>
+<div class="nav"><a href="industry.html">美股行業地圖 →</a></div></header>
 <div class="stats">
 <div class="stat"><span>站上 60MA</span><b>{n60}<small> / {n_all}</small></b></div>
 <div class="stat"><span>符合條件</span><b class="acc">{n_ok}</b></div>

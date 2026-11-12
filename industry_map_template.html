@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>美股行業地圖</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;800&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 新手開局讀本的姊妹冊 — 頂部總覽（板塊熱度格 + 象限），下方可篩選的行業卡片牆 */
+:root{
+  --bg:#F3F5F4; --paper:#FFFFFF; --ink:#18212B; --muted:#5B6672; --line:#D9DFE2;
+  --accent:#1D6A80; --accent-soft:#E2EFF2;
+  --exp:#1D6A80; --exp-bg:#DCEDF1;
+  --mix:#9A6A12; --mix-bg:#F5E9CC;
+  --flat:#5B6672; --flat-bg:#E7EBED;
+  --con:#A4432C; --con-bg:#F6E1DA;
+  --up:#C0392B; --dn:#2C7A4B;
+  --f-display:"Noto Serif TC","Songti TC",serif;
+  --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12171C; --paper:#1A2128; --ink:#E4E9EC; --muted:#97A3AD; --line:#2C3640;
+  --accent:#6FB7CB; --accent-soft:#1E3139;
+  --exp:#7CC3D6; --exp-bg:#1C3640; --mix:#E2B65C; --mix-bg:#3A3020;
+  --flat:#A3AEB7; --flat-bg:#28313A; --con:#EE9A80; --con-bg:#3D2620;
+  --up:#F07A6A; --dn:#6CC08E; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12171C; --paper:#1A2128; --ink:#E4E9EC; --muted:#97A3AD; --line:#2C3640;
+  --accent:#6FB7CB; --accent-soft:#1E3139;
+  --exp:#7CC3D6; --exp-bg:#1C3640; --mix:#E2B65C; --mix-bg:#3A3020;
+  --flat:#A3AEB7; --flat-bg:#28313A; --con:#EE9A80; --con-bg:#3D2620;
+  --up:#F07A6A; --dn:#6CC08E; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.7;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;padding-block:32px 72px}
+a{color:var(--accent)}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;color:var(--accent);text-transform:uppercase}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(30px,5vw,46px);line-height:1.2;margin:8px 0 10px;text-wrap:balance}
+.lede{font-size:17px;max-width:42em;margin:0}
+.meta{margin-top:12px;font-size:12.5px;color:var(--muted);font-family:var(--f-mono)}
+h2{font-family:var(--f-display);font-weight:800;font-size:clamp(21px,2.8vw,26px);margin:40px 0 6px;text-wrap:balance}
+.sub{color:var(--muted);font-size:14px;margin:0 0 14px;max-width:46em}
+
+/* 宏觀 */
+.macro{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:22px}
+.macro div{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px;line-height:1.5;min-width:0}
+.macro b{display:block;font-family:var(--f-mono);font-size:20px;font-weight:500}
+.macro small{color:var(--muted);font-size:13px;display:block}
+.macro em{font-style:normal;font-size:12px;color:var(--accent);font-family:var(--f-mono);letter-spacing:.06em}
+@media(max-width:760px){.macro{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* 板塊格 */
+.sectors{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.sec{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;text-align:left;font:inherit;color:inherit;display:grid;gap:4px;min-width:0}
+.sec:hover{border-color:var(--accent)}
+.sec.on{outline:2px solid var(--accent)}
+.sec .nm{font-weight:700;font-size:15px;display:flex;justify-content:space-between;gap:6px}
+.sec .nm span{font-family:var(--f-mono);font-size:11px;color:var(--muted);font-weight:400}
+.bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--line)}
+.bar i{display:block;height:100%}
+.sec .px{font-family:var(--f-mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* 象限 */
+.quad{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.quad div{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:0}
+.quad h3{margin:0 0 4px;font-size:15px}
+.quad p{margin:0 0 6px;font-size:13.5px;color:var(--muted)}
+.quad .lst{font-size:14px;line-height:1.6}
+@media(max-width:640px){.quad{grid-template-columns:minmax(0,1fr)}}
+
+/* 篩選 */
+.filters{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.chip{font:inherit;font-size:13.5px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:4px 12px;cursor:pointer}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+#q{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:5px 14px;min-width:0;flex:1 1 180px;max-width:280px}
+.count{font-family:var(--f-mono);font-size:12px;color:var(--muted);margin-left:auto}
+
+/* 卡片 */
+.group h3{font-family:var(--f-display);font-size:19px;margin:28px 0 10px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.group h3 span{font-family:var(--f-mono);font-size:12px;color:var(--muted);font-weight:400}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:8px;align-content:start;min-width:0}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.top b{font-size:16px;line-height:1.35}
+.top small{display:block;font-family:var(--f-mono);font-size:11px;color:var(--muted);font-weight:400}
+.pill{font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;white-space:nowrap;flex:none}
+.p-exp{background:var(--exp-bg);color:var(--exp)} .p-mix{background:var(--mix-bg);color:var(--mix)}
+.p-flat{background:var(--flat-bg);color:var(--flat)} .p-con{background:var(--con-bg);color:var(--con)}
+.row{font-size:14px;line-height:1.6;display:grid;grid-template-columns:44px minmax(0,1fr);gap:6px}
+.row > span:first-child{font-size:11.5px;color:var(--muted);padding-top:2px;letter-spacing:.04em}
+.foot{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;border-top:1px dashed var(--line);padding-top:8px;font-size:12.5px}
+.tk{font-family:var(--f-mono);font-size:12px;background:var(--accent-soft);padding:0 6px;border-radius:4px}
+.etf{font-family:var(--f-mono);font-variant-numeric:tabular-nums;color:var(--muted)}
+.u{color:var(--up)} .d{color:var(--dn)}
+.struct{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.empty{color:var(--muted);padding:20px 0}
+
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--muted);margin:8px 0 0}
+.legend .pill{font-weight:500}
+.mstat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.mstat div{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 14px;line-height:1.45;min-width:0}
+.mstat b{display:block;font-family:var(--f-mono);font-size:22px;font-weight:500;font-variant-numeric:tabular-nums}
+.mstat small{color:var(--muted);font-size:13px}
+@media(max-width:640px){.mstat{grid-template-columns:minmax(0,1fr)}}
+.filters2{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+.tbl table{border-collapse:collapse;width:100%;min-width:760px;font-size:14px;line-height:1.5}
+.tbl th,.tbl td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl th{font-size:11.5px;font-family:var(--f-mono);color:var(--muted);font-weight:500;background:var(--bg);letter-spacing:.04em}
+.tbl th.n,.tbl td.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td small{display:block;color:var(--muted);font-size:11.5px}
+.tbl tr.sh td{background:var(--bg);font-weight:700;font-size:13px;padding:6px 12px}
+.br{display:flex;align-items:center;gap:8px;white-space:nowrap;font-family:var(--f-mono);font-size:12.5px}
+.br .bar{width:64px;flex:none}
+.sk{display:flex;flex-wrap:wrap;gap:4px 8px;font-family:var(--f-mono);font-size:12px}
+.sk span{white-space:nowrap}
+footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-size:13.5px;color:var(--muted)}
+footer ul{padding-left:1.2em}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Stock Universe · GICS 11 板塊 · 74 行業</div>
+  <h1>美股行業地圖</h1>
+  <p class="lede">依《新手開局讀本》擴張 Universe 的第一步：先看到行業，再看公司。每個行業標出商業模式（賣什麼、向誰收錢）、營收驅動因子，以及目前是擴張還是收縮。</p>
+  <div class="meta">行業定義 2026-11-12 撰寫 · 均線每日盤後自動更新（最新 <span class="asof"></span> 收盤）· <a href="./">主題股均線追蹤 →</a> · 擴張判斷為整理者觀點，非投資建議</div>
+
+  <div class="macro" aria-label="宏觀背景">
+    <div><em>製造業 ISM</em><b>55.5</b><small>10 月，連 10 個月擴張；物價 75.2 仍高</small></div>
+    <div><em>Fed / 10Y</em><b>3.75–4% / ~5%</b><small>9 月升息後按兵不動；CPI 3.7%</small></div>
+    <div><em>Brent</em><b>~$104</b><small>中東供給受限；EIA 預期 2027 回落至 $84</small></div>
+    <div><em>S&amp;P 500 Q3</em><b>EPS +28%</b><small>營收 +14%；扣科技與能源僅 +10%</small></div>
+  </div>
+</header>
+
+<section>
+  <h2>板塊總覽</h2>
+  <p class="sub">色條是該板塊各行業的狀態比例；下方數字是板塊 ETF 距 60 日均線（台股慣例：紅＝在線上，綠＝在線下）。點一下板塊可篩選下方卡片。</p>
+  <div class="sectors" id="sectors"></div>
+  <div class="legend">
+    <span><span class="pill p-exp">擴張</span> TAM 成長＋當季營運/指引向上</span>
+    <span><span class="pill p-mix">分歧</span> 結構向上但週期或價格受壓，或子行業方向相反</span>
+    <span><span class="pill p-flat">持平</span></span>
+    <span><span class="pill p-con">收縮</span> 需求或 TAM 縮小</span>
+  </div>
+</section>
+
+<section>
+  <h2>基本面 × 價格面</h2>
+  <p class="sub">把「行業在擴張嗎」與「資金還在嗎」放在一起看。依各行業代表股平均距 50MA 自動分類。</p>
+  <div class="quad">
+    <div><h3>擴張 ＋ 站上 50MA</h3><p>基本面與資金同向</p><div class="lst" id="q1"></div></div>
+    <div><h3>收縮/分歧/持平 ＋ 站上 50MA</h3><p>防禦輪動或跌深反彈，留意持續性</p><div class="lst" id="q2"></div></div>
+    <div><h3>擴張 ＋ 跌破 50MA</h3><p>獲利仍強，但股價已提前反映、高檔修正</p><div class="lst" id="q3"></div></div>
+    <div><h3>收縮/分歧/持平 ＋ 跌破 50MA</h3><p>避開或只做沖銷</p><div class="lst" id="q4"></div></div>
+  </div>
+</section>
+
+<section>
+  <h2>行業卡片</h2>
+  <div class="filters" role="toolbar" aria-label="篩選">
+    <button class="chip on" data-st="all">全部</button>
+    <button class="chip" data-st="exp">擴張</button>
+    <button class="chip" data-st="mix">分歧</button>
+    <button class="chip" data-st="flat">持平</button>
+    <button class="chip" data-st="con">收縮</button>
+    <input id="q" type="search" placeholder="搜尋行業、代號、關鍵字" aria-label="搜尋">
+    <span class="count" id="count"></span>
+  </div>
+  <div id="list"></div>
+</section>
+
+<section id="ma50">
+  <h2>50 日均線位置</h2>
+  <p class="sub">每個行業用代表股算「平均距 50MA」與「站上 50MA 的檔數」，並列出行業 ETF 的位置。代表股平均比單看板塊 ETF 更貼近該行業本身。<span class="asof"></span> 收盤。</p>
+  <div class="mstat" id="mstat"></div>
+  <div class="filters2" role="toolbar" aria-label="排序">
+    <button class="chip on" data-sort="sec">依板塊</button>
+    <button class="chip" data-sort="hi">由強到弱</button>
+    <button class="chip" data-sort="lo">由弱到強</button>
+    <button class="chip" data-only="above">只看站上</button>
+    <button class="chip" data-only="below">只看跌破</button>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>行業</th><th>狀態</th><th class="n">代表股<br>平均距50MA</th><th>站上 50MA</th><th class="n">行業 ETF<br>距50MA</th><th>代表股（距50MA%）</th></tr></thead>
+    <tbody id="mbody"></tbody>
+  </table></div>
+  <p class="sub">紅＝在 50MA 之上，綠＝在 50MA 之下；↑↓ 為 50MA 近 5 日方向。標「板塊」的 ETF 是該行業沒有專屬 ETF，借用板塊 ETF。</p>
+</section>
+
+<footer>
+  <p><b>欄位說明</b>　模式＝商業模式（賣什麼、向誰收錢）；驅動＝營收驅動因子與該看的行業 KPI；判斷＝擴張或收縮的理由。結構箭頭是 3–5 年 TAM 方向，狀態標籤是當前週期。ETF 一欄格式為「代號 距60MA%（60MA 方向）」。</p>
+  <p><b>資料來源</b></p>
+  <ul>
+    <li><a href="https://advantage.factset.com/hubfs/Website/Resources%20Section/Research%20Desk/Earnings%20Insight/EarningsInsight_110626.pdf" target="_blank" rel="noopener">FactSet Earnings Insight 2026-11-06</a>（各板塊 Q3 營收/盈餘成長）</li>
+    <li><a href="https://finviz.com/news/418683/q3-earnings-update-broad-based-growth-key-sector-outliers-and-whats-ahead-for-q4" target="_blank" rel="noopener">Zacks Q3 Earnings Update</a>（Q4 預估下修板塊）</li>
+    <li><a href="https://www.inddist.com/economy/news/22978162/october-manufacturing-pmi-at-555" target="_blank" rel="noopener">ISM 10 月製造業 PMI</a>（擴張/收縮產業）</li>
+    <li><a href="https://eyeonhousing.org/2026/10/fed-holds-rates-with-two-votes-for-another-hike/" target="_blank" rel="noopener">NAHB：Fed 10 月決議</a>、<a href="https://finviz.com/news/415316/refining-margins-widen-and-lng-equipment-orders-land-as-wti-settles-near-96" target="_blank" rel="noopener">油價與煉油毛利</a>、<a href="https://investinglive.com/stocks/q3-earnings-sentiment-turns-defensive-as-walmart-deepens-the-warning/" target="_blank" rel="noopener">零售財報反應</a></li>
+    <li>價格：Yahoo Finance，<span class="asof"></span> 收盤，每日自動更新</li>
+  </ul>
+  <p>「判斷」文字與宏觀數字為 2026-11-12 撰寫，其中提到的價格位置以下方均線數據為準。擴張判斷是整理者綜合財報與總經資料的觀點，下 Thesis 前請用法說會第一手資料驗證。</p>
+</footer>
+</div>
+
+<script>
+const DATA=/*__DATA__*/null;
+// SECTORS: [key, 中文, English, ETF, 距60MA%, 60MA方向]
+const SECTORS=DATA.sectors;
+// D: [sector, 名稱, English, 狀態, 結構, 模式, 驅動, 判斷, ETF, 距60MA%, 60MA方向, 代表股]
+const D=DATA.D;
+document.querySelectorAll(".asof").forEach(e=>e.textContent=DATA.asof);
+
+const ST={exp:["擴張","p-exp","var(--exp)"],mix:["分歧","p-mix","var(--mix)"],flat:["持平","p-flat","var(--flat)"],con:["收縮","p-con","var(--con)"]};
+let fSec=null,fSt="all",fQ="";
+try{const s=JSON.parse(localStorage.getItem("uim")||"{}");fSec=s.sec||null;fSt=s.st||"all";}catch(e){}
+const save=()=>{try{localStorage.setItem("uim",JSON.stringify({sec:fSec,st:fSt}))}catch(e){}};
+const pct=v=>`<span class="${v>0?"u":"d"}">${v>0?"+":""}${v.toFixed(1)}%</span>`;
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function renderSectors(){
+  document.getElementById("sectors").innerHTML=SECTORS.map(([k,zh,en,etf,v60,dir])=>{
+    const rows=D.filter(r=>r[0]===k),n=rows.length;
+    const seg=["exp","mix","flat","con"].map(s=>{const c=rows.filter(r=>r[3]===s).length;return c?`<i style="width:${c/n*100}%;background:${ST[s][2]}" title="${ST[s][0]} ${c}"></i>`:""}).join("");
+    const e=rows.filter(r=>r[3]==="exp").length,c=rows.filter(r=>r[3]==="con").length;
+    return `<button class="sec${fSec===k?" on":""}" data-k="${k}" aria-pressed="${fSec===k}"><div class="nm">${zh}<span>${n} 行業</span></div><div class="bar">${seg}</div><div class="px">擴張 ${e} · 收縮 ${c}　${etf} ${pct(v60)} ${dir}</div></button>`;
+  }).join("");
+  document.querySelectorAll(".sec").forEach(b=>b.onclick=()=>{fSec=fSec===b.dataset.k?null:b.dataset.k;save();renderSectors();renderList();document.getElementById("list").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth",block:"start"});});
+}
+
+function renderList(){
+  const q=fQ.trim().toLowerCase();
+  const rows=D.filter(r=>(!fSec||r[0]===fSec)&&(fSt==="all"||r[3]===fSt)&&(!q||r.join(" ").toLowerCase().includes(q)));
+  document.getElementById("count").textContent=`${rows.length} / ${D.length} 行業`;
+  if(!rows.length){document.getElementById("list").innerHTML='<p class="empty">沒有符合的行業，換個關鍵字或清除篩選。</p>';return;}
+  document.getElementById("list").innerHTML=SECTORS.filter(s=>rows.some(r=>r[0]===s[0])).map(([k,zh,en,etf,v60])=>{
+    const g=rows.filter(r=>r[0]===k);
+    return `<div class="group"><h3>${zh}<span>${en} · ${etf} ${v60>0?"+":""}${v60.toFixed(1)}% vs 60MA</span></h3><div class="cards">${g.map(r=>{
+      const [_,zhN,enN,st,str,model,drv,why,e,v,dir,tks]=r;
+      return `<article class="card"><div class="top"><b>${esc(zhN)}<small>${esc(enN)}</small></b><span class="pill ${ST[st][1]}">${ST[st][0]}</span></div>
+      <div class="row"><span>模式</span><span>${esc(model)}</span></div>
+      <div class="row"><span>驅動</span><span>${esc(drv)}</span></div>
+      <div class="row"><span>判斷</span><span>${esc(why)}</span></div>
+      <div class="foot"><span class="struct">結構 ${str}</span><span class="etf">${e} ${pct(v)} (60MA${dir})</span>${tks.split(" ").map(t=>`<span class="tk">${t}</span>`).join("")}</div></article>`}).join("")}</div></div>`;
+  }).join("");
+}
+
+document.querySelectorAll(".filters .chip").forEach(c=>{
+  if(c.dataset.st===fSt){document.querySelectorAll(".filters .chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");}
+  c.onclick=()=>{fSt=c.dataset.st;document.querySelectorAll(".filters .chip").forEach(x=>x.classList.toggle("on",x===c));save();renderList();};
+});
+document.getElementById("q").addEventListener("input",e=>{fQ=e.target.value;renderList();});
+renderSectors();renderList();
+
+// 50MA：[距20MA%, 距50MA%, 50MA上揚=1]
+const M50=DATA.m50;
+const SECETF=new Set(SECTORS.map(s=>s[3]));
+let mSort="sec",mOnly=null;
+const MR=D.map(r=>{
+  const tks=r[11].split(" ").filter(t=>M50[t]);
+  const v=tks.map(t=>M50[t][1]);
+  const avg=v.length?v.reduce((a,b)=>a+b,0)/v.length:null;
+  return {r,tks,avg,up:v.filter(x=>x>0).length,n:v.length,etf:r[8],ev:M50[r[8]]};
+});
+(function(){
+  const tot=MR.reduce((a,m)=>a+m.n,0),up=MR.reduce((a,m)=>a+m.up,0);
+  const ia=MR.filter(m=>m.avg>0).length;
+  const spy=M50.SPY;
+  document.getElementById("mstat").innerHTML=
+   `<div><small>平均站上 50MA 的行業</small><b>${ia} / ${MR.length}</b></div>`+
+   `<div><small>代表股站上 50MA</small><b>${up} / ${tot}</b><small>${Math.round(up/tot*100)}% 廣度</small></div>`+
+   `<div><small>SPY 距 50MA</small><b>${pct(spy[1])}</b><small>距 20MA ${spy[0]>0?"+":""}${spy[0]}%</small></div>`;
+})();
+function renderMA(){
+  let rows=MR.slice();
+  if(mOnly==="above")rows=rows.filter(m=>m.avg>0);
+  if(mOnly==="below")rows=rows.filter(m=>m.avg<=0);
+  const line=m=>{
+    const [k,zh,en,st]=m.r;const sn=SECTORS.find(s=>s[0]===k)[1];
+    const seg=m.n?`<i style="width:${m.up/m.n*100}%;background:var(--up)"></i><i style="width:${(m.n-m.up)/m.n*100}%;background:var(--dn)"></i>`:"";
+    const ev=m.ev?`${pct(m.ev[1])} ${m.ev[2]?"↑":"↓"}<small>${m.etf}${SECETF.has(m.etf)?"（板塊）":""}</small>`:"—";
+    return `<tr><td><b>${esc(zh)}</b><small>${sn} · ${esc(en)}</small></td><td><span class="pill ${ST[st][1]}">${ST[st][0]}</span></td>`+
+      `<td class="n">${m.avg==null?"—":pct(m.avg)}</td><td><div class="br"><div class="bar">${seg}</div>${m.up}/${m.n}</div></td>`+
+      `<td class="n">${ev}</td><td><div class="sk">${m.tks.map(t=>`<span>${t} ${pct(M50[t][1])}${M50[t][2]?"↑":"↓"}</span>`).join("")}</div></td></tr>`;
+  };
+  let html="";
+  if(mSort==="sec"){
+    SECTORS.forEach(([k,zh,,etf])=>{const g=rows.filter(m=>m.r[0]===k);if(!g.length)return;const e=M50[etf];
+      html+=`<tr class="sh"><td colspan="6">${zh}　<span class="etf">${etf} 距50MA ${pct(e[1])} ${e[2]?"↑":"↓"}</span></td></tr>`+g.sort((a,b)=>b.avg-a.avg).map(line).join("");});
+  }else{
+    rows.sort((a,b)=>mSort==="hi"?b.avg-a.avg:a.avg-b.avg);html=rows.map(line).join("");
+  }
+  document.getElementById("mbody").innerHTML=html||'<tr><td colspan="6" class="empty">沒有符合的行業</td></tr>';
+}
+document.querySelectorAll("#ma50 .chip").forEach(c=>c.onclick=()=>{
+  if(c.dataset.sort){mSort=c.dataset.sort;document.querySelectorAll("#ma50 [data-sort]").forEach(x=>x.classList.toggle("on",x===c));}
+  else{mOnly=mOnly===c.dataset.only?null:c.dataset.only;document.querySelectorAll("#ma50 [data-only]").forEach(x=>x.classList.toggle("on",x.dataset.only===mOnly));}
+  renderMA();
+});
+renderMA();
+(function(){
+  const q={q1:[],q2:[],q3:[],q4:[]};
+  MR.slice().sort((a,b)=>b.avg-a.avg).forEach(m=>{const ex=m.r[3]==="exp",up=m.avg>0;
+    q[ex?(up?"q1":"q3"):(up?"q2":"q4")].push(`${esc(m.r[1])}<span class="etf"> ${m.avg>0?"+":""}${m.avg.toFixed(1)}%</span>`);});
+  Object.keys(q).forEach(k=>document.getElementById(k).innerHTML=q[k].join("、")||"—");
+})();
+</script>

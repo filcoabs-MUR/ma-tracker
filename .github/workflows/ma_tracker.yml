@@ -32,17 +32,23 @@ jobs:
           TZ: Asia/Taipei
         run: python ma_tracker.py
 
+      - name: Run industry map
+        env:
+          TZ: Asia/Taipei
+        run: python industry_map.py
+
       # Pages 從 main 根目錄發布，push 後自動更新網頁
       - name: Prepare Pages
         run: |
           cp output/latest.html index.html
           cp output/latest.csv latest.csv
+          cp output/industry_map.html industry.html
 
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add output/ index.html latest.csv
+          git add output/ index.html latest.csv industry.html
           git diff --cached --quiet || git commit -m "MA tracker $(TZ=Asia/Taipei date '+%Y-%m-%d %H:%M')"
           git pull --rebase
           git push

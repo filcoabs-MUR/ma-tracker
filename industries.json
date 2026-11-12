@@ -1,0 +1,1250 @@
+{
+ "note": "行業定義。status: exp 擴張 / mix 分歧 / flat 持平 / con 收縮；structure: ↑ → ↓。etf 留空則用板塊 ETF。價格欄位由 industry_map.py 每日計算，不必手動填。",
+ "sectors": [
+  {
+   "key": "en",
+   "zh": "能源",
+   "en": "Energy",
+   "etf": "XLE"
+  },
+  {
+   "key": "ma",
+   "zh": "原物料",
+   "en": "Materials",
+   "etf": "XLB"
+  },
+  {
+   "key": "in",
+   "zh": "工業",
+   "en": "Industrials",
+   "etf": "XLI"
+  },
+  {
+   "key": "cd",
+   "zh": "非必需消費",
+   "en": "Cons. Discretionary",
+   "etf": "XLY"
+  },
+  {
+   "key": "cs",
+   "zh": "必需消費",
+   "en": "Cons. Staples",
+   "etf": "XLP"
+  },
+  {
+   "key": "hc",
+   "zh": "醫療保健",
+   "en": "Health Care",
+   "etf": "XLV"
+  },
+  {
+   "key": "fi",
+   "zh": "金融",
+   "en": "Financials",
+   "etf": "XLF"
+  },
+  {
+   "key": "it",
+   "zh": "資訊科技",
+   "en": "Info Tech",
+   "etf": "XLK"
+  },
+  {
+   "key": "cm",
+   "zh": "通訊服務",
+   "en": "Comm. Services",
+   "etf": "XLC"
+  },
+  {
+   "key": "ut",
+   "zh": "公用事業",
+   "en": "Utilities",
+   "etf": "XLU"
+  },
+  {
+   "key": "re",
+   "zh": "不動產",
+   "en": "Real Estate",
+   "etf": "XLRE"
+  }
+ ],
+ "industries": [
+  {
+   "sector": "en",
+   "zh": "油田設備與服務",
+   "en": "Energy Equipment & Services",
+   "status": "mix",
+   "structure": "→",
+   "model": "鑽井、完井按日費率收費，加上設備銷售與長約維修",
+   "driver": "鑽機數、日費率、訂單 backlog",
+   "thesis": "油價高，但 Q3 盈餘 −3%，是能源板塊最差；北美鑽機數反覆。LNG/燃氣壓縮設備訂單創高，BKR IET 未交貨訂單 $39.4B",
+   "etf": "OIH",
+   "tickers": [
+    "SLB",
+    "HAL",
+    "BKR"
+   ]
+  },
+  {
+   "sector": "en",
+   "zh": "綜合石油",
+   "en": "Integrated Oil & Gas",
+   "status": "exp",
+   "structure": "→",
+   "model": "上游開採＋下游煉化，賺油價×產量加上價差",
+   "driver": "油價、產量、煉油利用率",
+   "thesis": "Q3 能源盈餘 +149%，中東供給受限推升油價；EIA 預期 2027 回落，屬週期高點",
+   "etf": "XLE",
+   "tickers": [
+    "XOM",
+    "CVX"
+   ]
+  },
+  {
+   "sector": "en",
+   "zh": "探勘與生產",
+   "en": "Oil & Gas E&P",
+   "status": "exp",
+   "structure": "→",
+   "model": "賣原油、天然氣；營收＝產量×價格，成本為每桶開採成本",
+   "driver": "油價、天然氣價、每桶成本、資本紀律",
+   "thesis": "油價約 $96–104 支撐現金流；但 XOP 已跌破 60MA，市場開始定價油價回落",
+   "etf": "XOP",
+   "tickers": [
+    "COP",
+    "EOG",
+    "FANG"
+   ]
+  },
+  {
+   "sector": "en",
+   "zh": "煉油與行銷",
+   "en": "Refining & Marketing",
+   "status": "exp",
+   "structure": "→",
+   "model": "買原油、賣汽柴油，賺裂解價差（crack spread）",
+   "driver": "裂解價差、煉油利用率",
+   "thesis": "Q3 盈餘 +542% 全市場最高；PSX 煉油毛利 $38/桶、利用率 98%。CRAK 距 60MA −9%，屬週期頂部特徵",
+   "etf": "CRAK",
+   "tickers": [
+    "VLO",
+    "MPC",
+    "PSX"
+   ]
+  },
+  {
+   "sector": "en",
+   "zh": "儲運（中游）",
+   "en": "Storage & Transportation",
+   "status": "exp",
+   "structure": "↑",
+   "model": "管線、儲槽按量收費，多為 take-or-pay 長約，類公用事業",
+   "driver": "輸送量、費率調整、新管線案",
+   "thesis": "LNG 出口擴張（2026 約 17.6 Bcf/d）＋資料中心天然氣發電需求",
+   "etf": "AMLP",
+   "tickers": [
+    "WMB",
+    "KMI",
+    "ET",
+    "LNG"
+   ]
+  },
+  {
+   "sector": "en",
+   "zh": "鈾與煤",
+   "en": "Coal & Consumable Fuels",
+   "status": "mix",
+   "structure": "↑",
+   "model": "賣燃料給電廠；鈾以多年長約為主",
+   "driver": "鈾長約價、核電新建/延役",
+   "thesis": "核能是 AI 電力的長線題材，但 URA 距高點 −46%、跌破 60MA 16%，價格面已收縮",
+   "etf": "URA",
+   "tickers": [
+    "CCJ"
+   ]
+  },
+  {
+   "sector": "ma",
+   "zh": "工業氣體",
+   "en": "Industrial Gases",
+   "status": "exp",
+   "structure": "↑",
+   "model": "氧、氮、氫按長約供應，含現場製氣，take-or-pay",
+   "driver": "合約量、價格調整、新廠案",
+   "thesis": "半導體廠、電子特氣需求成長；長約模式抗週期",
+   "etf": "XLB",
+   "tickers": [
+    "LIN",
+    "APD"
+   ]
+  },
+  {
+   "sector": "ma",
+   "zh": "大宗/特用化學",
+   "en": "Commodity & Specialty Chemicals",
+   "status": "flat",
+   "structure": "→",
+   "model": "大宗化學賺原料與產品價差；特化賣配方、有定價權",
+   "driver": "價差、稼動率、中國產能",
+   "thesis": "高油價推升原料成本，中國產能過剩壓價；ISM 化學品回到成長",
+   "etf": "XLB",
+   "tickers": [
+    "DOW",
+    "LYB",
+    "DD",
+    "SHW"
+   ]
+  },
+  {
+   "sector": "ma",
+   "zh": "建材",
+   "en": "Construction Materials",
+   "status": "con",
+   "structure": "↑",
+   "model": "骨材、水泥；運輸半徑短，形成地方寡占",
+   "driver": "出貨量、每噸價格、基建撥款",
+   "thesis": "Q3 盈餘 −4% 為原物料最差；ISM 非金屬礦物收縮；住宅弱、利率高",
+   "etf": "XLB",
+   "tickers": [
+    "VMC",
+    "MLM"
+   ]
+  },
+  {
+   "sector": "ma",
+   "zh": "容器與包裝",
+   "en": "Containers & Packaging",
+   "status": "con",
+   "structure": "→",
+   "model": "紙箱、鋁罐、塑膠容器，按量收費、成本轉嫁",
+   "driver": "箱子出貨量、價格",
+   "thesis": "ISM 紙製品收縮；消費量能放緩",
+   "etf": "XLB",
+   "tickers": [
+    "IP",
+    "PKG",
+    "BALL"
+   ]
+  },
+  {
+   "sector": "ma",
+   "zh": "金屬與採礦",
+   "en": "Metals & Mining",
+   "status": "mix",
+   "structure": "↑",
+   "model": "價格接受者：銅、金、鋼、鋁，營收＝產量×商品價",
+   "driver": "商品價格、產量、單位成本",
+   "thesis": "Q3 盈餘 +56% 為原物料最高；銅受惠電網與 AI。但 COPX、XME、GDX 都跌破 60MA，價格面轉弱",
+   "etf": "XME",
+   "tickers": [
+    "FCX",
+    "SCCO",
+    "NEM",
+    "NUE"
+   ]
+  },
+  {
+   "sector": "ma",
+   "zh": "紙與林產",
+   "en": "Paper & Forest Products",
+   "status": "con",
+   "structure": "→",
+   "model": "木材、木板、紙漿，跟住宅開工連動",
+   "driver": "木材價、住宅開工",
+   "thesis": "住宅市場低迷，成屋銷售低於 400 萬戶",
+   "etf": "XLB",
+   "tickers": [
+    "LPX"
+   ]
+  },
+  {
+   "sector": "in",
+   "zh": "航太與國防",
+   "en": "Aerospace & Defense",
+   "status": "exp",
+   "structure": "↑",
+   "model": "國防：政府合約（成本加成或固定價）；民航：飛機與引擎，加上高毛利售後維修",
+   "driver": "國防預算、飛機交付量、售後收入",
+   "thesis": "Zacks 航太 Q3 盈餘 +157%；民航交機缺口加國防預算；政治不確定性升高",
+   "etf": "ITA",
+   "tickers": [
+    "RTX",
+    "LMT",
+    "GE",
+    "HWM",
+    "BA"
+   ]
+  },
+  {
+   "sector": "in",
+   "zh": "建築產品",
+   "en": "Building Products",
+   "status": "mix",
+   "structure": "→",
+   "model": "門窗、屋頂、HVAC；新建與修繕（R&R）各半",
+   "driver": "住宅開工、修繕支出、商用建案",
+   "thesis": "住宅端弱；資料中心 HVAC 與冷卻需求強",
+   "etf": "XHB",
+   "tickers": [
+    "CARR",
+    "TT",
+    "JCI"
+   ]
+  },
+  {
+   "sector": "in",
+   "zh": "營建與工程",
+   "en": "Construction & Engineering",
+   "status": "exp",
+   "structure": "↑",
+   "model": "承包工程賺毛利；看在手訂單",
+   "driver": "backlog、book-to-bill",
+   "thesis": "資料中心、電力、晶圓廠建置帶動訂單",
+   "etf": "PAVE",
+   "tickers": [
+    "PWR",
+    "EME",
+    "FIX"
+   ]
+  },
+  {
+   "sector": "in",
+   "zh": "電氣設備",
+   "en": "Electrical Equipment",
+   "status": "exp",
+   "structure": "↑",
+   "model": "變壓器、開關設備、電纜、燃氣渦輪；交期長、訂單能見度高",
+   "driver": "訂單、交期、價格",
+   "thesis": "ISM 電氣設備成長；GEV 渦輪交期排到 2030。但 GRID 距高點 −19%，價格面修正",
+   "etf": "GRID",
+   "tickers": [
+    "GEV",
+    "ETN",
+    "VRT",
+    "HUBB"
+   ]
+  },
+  {
+   "sector": "in",
+   "zh": "綜合工業",
+   "en": "Industrial Conglomerates",
+   "status": "flat",
+   "structure": "→",
+   "model": "多元事業組合，常拆分重組",
+   "driver": "各事業部營收",
+   "thesis": "整體跟 ISM 同步；拆分事件驅動",
+   "etf": "XLI",
+   "tickers": [
+    "HON",
+    "MMM"
+   ]
+  },
+  {
+   "sector": "in",
+   "zh": "機械",
+   "en": "Machinery",
+   "status": "exp",
+   "structure": "→",
+   "model": "農機、工程機、工業機械、卡車；新機銷售加零件服務",
+   "driver": "ISM 新訂單、經銷商庫存",
+   "thesis": "ISM 機械成長、產出指數 59；Deere 財報獲正面反應。關稅推升成本",
+   "etf": "XLI",
+   "tickers": [
+    "CAT",
+    "DE",
+    "PH",
+    "CMI"
+   ]
+  },
+  {
+   "sector": "in",
+   "zh": "貿易與經銷",
+   "en": "Trading Companies & Distributors",
+   "status": "exp",
+   "structure": "→",
+   "model": "MRO 零件經銷、設備租賃；按量加價",
+   "driver": "日均銷售、租賃利用率",
+   "thesis": "跟製造業與營建活動連動，ISM 連 10 個月擴張",
+   "etf": "XLI",
+   "tickers": [
+    "FAST",
+    "GWW",
+    "URI"
+   ]
+  },
+  {
+   "sector": "in",
+   "zh": "商業服務",
+   "en": "Commercial Services & Supplies",
+   "status": "exp",
+   "structure": "↑",
+   "model": "廢棄物處理、制服清潔、安保；長約加定價權",
+   "driver": "價格調整、客戶留存",
+   "thesis": "廢棄物業者有穩定提價能力，具防禦性",
+   "etf": "XLI",
+   "tickers": [
+    "WM",
+    "RSG",
+    "CTAS"
+   ]
+  },
+  {
+   "sector": "in",
+   "zh": "專業服務",
+   "en": "Professional Services",
+   "status": "mix",
+   "structure": "→",
+   "model": "人力派遣、顧問、資料驗證服務",
+   "driver": "招募量、時薪、合約續約",
+   "thesis": "人力派遣受 AI 替代與招募放緩壓制；資料/評等類穩定",
+   "etf": "XLI",
+   "tickers": [
+    "VRSK",
+    "BAH",
+    "RHI"
+   ]
+  },
+  {
+   "sector": "in",
+   "zh": "航空貨運與物流",
+   "en": "Air Freight & Logistics",
+   "status": "con",
+   "structure": "→",
+   "model": "包裹按件數×單價；貨代賺運價差",
+   "driver": "包裹量、單件營收",
+   "thesis": "關稅干擾貿易流量，包裹量疲弱",
+   "etf": "IYT",
+   "tickers": [
+    "UPS",
+    "FDX"
+   ]
+  },
+  {
+   "sector": "in",
+   "zh": "航空",
+   "en": "Passenger Airlines",
+   "status": "mix",
+   "structure": "→",
+   "model": "票價×座位×載客率；高端艙等與聯名卡貢獻利潤",
+   "driver": "單位營收 RASM、燃油成本、載客率",
+   "thesis": "高油價壓燃料成本；高端旅遊強、經濟艙弱。JETS 近期反彈站上 60MA",
+   "etf": "JETS",
+   "tickers": [
+    "DAL",
+    "UAL"
+   ]
+  },
+  {
+   "sector": "in",
+   "zh": "陸運",
+   "en": "Ground Transportation",
+   "status": "con",
+   "structure": "→",
+   "model": "鐵路按車廂量；卡車/LTL 按噸數×費率",
+   "driver": "貨量、費率、營運比率 OR",
+   "thesis": "Zacks：運輸板塊 Q4 預估持續下修；貨運週期未見回升",
+   "etf": "IYT",
+   "tickers": [
+    "UNP",
+    "CSX",
+    "ODFL"
+   ]
+  },
+  {
+   "sector": "cd",
+   "zh": "汽車",
+   "en": "Automobiles",
+   "status": "con",
+   "structure": "→",
+   "model": "賣車、金融分期；EV 加軟體服務",
+   "driver": "交車量、平均售價、庫存天數",
+   "thesis": "Zacks：汽車 Q4 預估下修；EV 補貼退場、關稅推升成本",
+   "etf": "CARZ",
+   "tickers": [
+    "TSLA",
+    "GM",
+    "F"
+   ]
+  },
+  {
+   "sector": "cd",
+   "zh": "汽車零組件",
+   "en": "Automobile Components",
+   "status": "con",
+   "structure": "→",
+   "model": "原廠配套，按車型壽期出貨",
+   "driver": "北美汽車產量",
+   "thesis": "跟整車產量同步走弱",
+   "etf": "CARZ",
+   "tickers": [
+    "APTV",
+    "BWA"
+   ]
+  },
+  {
+   "sector": "cd",
+   "zh": "住宅建商與耐久財",
+   "en": "Household Durables",
+   "status": "con",
+   "structure": "→",
+   "model": "建商賣房賺毛利；家電、家具賣耐久品",
+   "driver": "新屋訂單、取消率、購屋激勵",
+   "thesis": "10Y 約 5%、成屋銷售低於 400 萬戶。ITB 站上 60MA，但 60MA 仍下彎、距高點 −16%",
+   "etf": "ITB",
+   "tickers": [
+    "DHI",
+    "LEN",
+    "PHM",
+    "WHR"
+   ]
+  },
+  {
+   "sector": "cd",
+   "zh": "休閒產品",
+   "en": "Leisure Products",
+   "status": "con",
+   "structure": "→",
+   "model": "玩具、泳池、運動器材，偏可選消費",
+   "driver": "零售通路庫存、同店銷售",
+   "thesis": "消費者縮減非必要支出",
+   "etf": "XLY",
+   "tickers": [
+    "HAS",
+    "POOL"
+   ]
+  },
+  {
+   "sector": "cd",
+   "zh": "服飾與鞋類",
+   "en": "Textiles, Apparel & Luxury",
+   "status": "con",
+   "structure": "↓",
+   "model": "品牌授權、批發加直營；奢侈品靠定價權",
+   "driver": "同店銷售、折扣率、庫存",
+   "thesis": "讀本點名的衰退行業（運動鞋）；降級消費",
+   "etf": "XLY",
+   "tickers": [
+    "NKE",
+    "LULU",
+    "DECK"
+   ]
+  },
+  {
+   "sector": "cd",
+   "zh": "飯店、餐廳與休閒",
+   "en": "Hotels, Restaurants & Leisure",
+   "status": "exp",
+   "structure": "↑",
+   "model": "郵輪：船票＋船上消費；飯店：RevPAR 與加盟費；餐廳：同店銷售與加盟",
+   "driver": "RevPAR、郵輪訂位與票價、同店銷售",
+   "thesis": "體驗型消費強；餐飲資金從速食回流全服務餐廳",
+   "etf": "PEJ",
+   "tickers": [
+    "RCL",
+    "MAR",
+    "CMG",
+    "MCD"
+   ]
+  },
+  {
+   "sector": "cd",
+   "zh": "多元消費服務",
+   "en": "Diversified Consumer Services",
+   "status": "flat",
+   "structure": "→",
+   "model": "教育、殯葬、生活服務，按次或合約收費",
+   "driver": "學員數、服務量",
+   "thesis": "需求穩定、低週期",
+   "etf": "XLY",
+   "tickers": [
+    "SCI"
+   ]
+  },
+  {
+   "sector": "cd",
+   "zh": "網路與多元零售",
+   "en": "Broadline Retail",
+   "status": "exp",
+   "structure": "↑",
+   "model": "電商自營＋平台抽成＋廣告＋會員",
+   "driver": "GMV、廣告營收、物流成本",
+   "thesis": "電商滲透率持續提升；AMZN Q3 財報獲正面反應",
+   "etf": "XRT",
+   "tickers": [
+    "AMZN",
+    "MELI"
+   ]
+  },
+  {
+   "sector": "cd",
+   "zh": "專業零售",
+   "en": "Specialty Retail",
+   "status": "mix",
+   "structure": "→",
+   "model": "居家修繕、汽車售後、折扣服飾，各有不同驅動",
+   "driver": "同店銷售、客單價、車齡",
+   "thesis": "折扣零售受惠降級消費（ROST 正面）；居家修繕受成屋週轉低拖累",
+   "etf": "XRT",
+   "tickers": [
+    "HD",
+    "LOW",
+    "AZO",
+    "TJX",
+    "ROST"
+   ]
+  },
+  {
+   "sector": "cs",
+   "zh": "量販與必需品零售",
+   "en": "Consumer Staples Retail",
+   "status": "exp",
+   "structure": "↑",
+   "model": "低毛利高週轉，加上會員費",
+   "driver": "同店銷售、會員續約率、電商",
+   "thesis": "Walmart 小幅上修全年目標，但示警消費緊縮後股價跌 9%；龍頭持續搶市占",
+   "etf": "XLP",
+   "tickers": [
+    "WMT",
+    "COST"
+   ]
+  },
+  {
+   "sector": "cs",
+   "zh": "飲料",
+   "en": "Beverages",
+   "status": "mix",
+   "structure": "→",
+   "model": "濃縮液賣給裝瓶商、品牌定價權；酒類靠高端化",
+   "driver": "量、價格/組合",
+   "thesis": "非酒精飲料穩定；酒類結構性走弱（年輕人少喝、GLP-1）",
+   "etf": "PBJ",
+   "tickers": [
+    "KO",
+    "PEP",
+    "STZ"
+   ]
+  },
+  {
+   "sector": "cs",
+   "zh": "包裝食品",
+   "en": "Food Products",
+   "status": "con",
+   "structure": "↓",
+   "model": "品牌食品，靠漲價與通路陳列",
+   "driver": "量、價格、自有品牌滲透",
+   "thesis": "漲價空間用盡、量縮；GLP-1 影響熱量攝取。Zacks：必需消費 Q4 預估下修",
+   "etf": "PBJ",
+   "tickers": [
+    "GIS",
+    "KHC",
+    "MDLZ",
+    "HSY"
+   ]
+  },
+  {
+   "sector": "cs",
+   "zh": "菸草",
+   "en": "Tobacco",
+   "status": "flat",
+   "structure": "→",
+   "model": "量縮價漲，加上減害產品",
+   "driver": "價格、減害產品（ZYN、IQOS）成長",
+   "thesis": "傳統菸量下滑，由減害產品抵銷",
+   "etf": "XLP",
+   "tickers": [
+    "PM",
+    "MO"
+   ]
+  },
+  {
+   "sector": "cs",
+   "zh": "家用品",
+   "en": "Household Products",
+   "status": "flat",
+   "structure": "→",
+   "model": "日用品品牌，靠定價與規模",
+   "driver": "有機成長、量價拆分",
+   "thesis": "需求穩定，成長有限",
+   "etf": "XLP",
+   "tickers": [
+    "PG",
+    "CL",
+    "CLX"
+   ]
+  },
+  {
+   "sector": "cs",
+   "zh": "個人護理",
+   "en": "Personal Care Products",
+   "status": "mix",
+   "structure": "→",
+   "model": "美妝、保養品牌，靠行銷與通路",
+   "driver": "有機成長、中國/旅遊零售",
+   "thesis": "EL 財報獲正面反應；平價美妝競爭激烈（讀本例：IFF 說美妝差，先避開 ELF）",
+   "etf": "XLP",
+   "tickers": [
+    "EL",
+    "ELF",
+    "KMB"
+   ]
+  },
+  {
+   "sector": "hc",
+   "zh": "醫療設備與用品",
+   "en": "Health Care Equipment & Supplies",
+   "status": "exp",
+   "structure": "↑",
+   "model": "設備銷售加耗材的刀片模式；裝機量帶動耗材",
+   "driver": "手術量、裝機量、耗材營收",
+   "thesis": "高齡化帶動手術量；IHI 站上 60MA 且 60MA 上揚",
+   "etf": "IHI",
+   "tickers": [
+    "ISRG",
+    "SYK",
+    "BSX"
+   ]
+  },
+  {
+   "sector": "hc",
+   "zh": "醫療服務提供者",
+   "en": "Health Care Providers & Services",
+   "status": "mix",
+   "structure": "→",
+   "model": "保險：按人頭收保費，看醫療損失率；醫院：按服務量收費；PBM 抽藥價差",
+   "driver": "醫療損失率 MLR、就診量、會員數",
+   "thesis": "醫療利用率高：醫院受惠、保險商 MLR 承壓。IHF 站上 60MA",
+   "etf": "IHF",
+   "tickers": [
+    "UNH",
+    "ELV",
+    "HCA",
+    "CVS"
+   ]
+  },
+  {
+   "sector": "hc",
+   "zh": "醫療資訊科技",
+   "en": "Health Care Technology",
+   "status": "flat",
+   "structure": "→",
+   "model": "醫療 SaaS 訂閱",
+   "driver": "ARR、客戶數",
+   "thesis": "穩定成長，題材少",
+   "etf": "XLV",
+   "tickers": [
+    "VEEV"
+   ]
+  },
+  {
+   "sector": "hc",
+   "zh": "生技",
+   "en": "Biotechnology",
+   "status": "mix",
+   "structure": "↑",
+   "model": "研發管線加授權；上市藥靠專利期內定價",
+   "driver": "臨床數據、FDA 審批、併購",
+   "thesis": "利率高不利融資；併購活躍。XBI 貼近 60MA",
+   "etf": "XBI",
+   "tickers": [
+    "VRTX",
+    "REGN",
+    "AMGN"
+   ]
+  },
+  {
+   "sector": "hc",
+   "zh": "製藥",
+   "en": "Pharmaceuticals",
+   "status": "exp",
+   "structure": "↑",
+   "model": "專利期內高定價，到期後面臨專利懸崖",
+   "driver": "新藥銷售、專利到期、藥價政策",
+   "thesis": "GLP-1 減重藥需求擴張；藥價政策仍是變數。PPH 站上 60MA",
+   "etf": "PPH",
+   "tickers": [
+    "LLY",
+    "MRK",
+    "PFE"
+   ]
+  },
+  {
+   "sector": "hc",
+   "zh": "生命科學工具與服務",
+   "en": "Life Sciences Tools & Services",
+   "status": "flat",
+   "structure": "→",
+   "model": "儀器加耗材；CRO 按臨床試驗收費",
+   "driver": "藥廠研發支出、生技融資、學研預算",
+   "thesis": "生技融資與學研預算偏緊；溫和復甦",
+   "etf": "XLV",
+   "tickers": [
+    "TMO",
+    "DHR",
+    "IQV"
+   ]
+  },
+  {
+   "sector": "fi",
+   "zh": "銀行",
+   "en": "Banks",
+   "status": "exp",
+   "structure": "→",
+   "model": "淨利差 NIM 加手續費；信用成本為主要風險",
+   "driver": "放款成長、NIM、逾期率",
+   "thesis": "10Y 約 5%、曲線變陡有利 NIM；區域銀行留意商用不動產",
+   "etf": "KRE",
+   "tickers": [
+    "JPM",
+    "BAC",
+    "WFC"
+   ]
+  },
+  {
+   "sector": "fi",
+   "zh": "支付與金融科技",
+   "en": "Financial Services: Payments",
+   "status": "exp",
+   "structure": "↑",
+   "model": "按交易金額抽成（take rate）",
+   "driver": "支付金額、跨境交易量",
+   "thesis": "名目消費加通膨推升交易額；BNPL（Klarna）財報偏弱",
+   "etf": "IPAY",
+   "tickers": [
+    "V",
+    "MA",
+    "PYPL"
+   ]
+  },
+  {
+   "sector": "fi",
+   "zh": "消費金融",
+   "en": "Consumer Finance",
+   "status": "mix",
+   "structure": "→",
+   "model": "信用卡、分期，賺利息加手續費",
+   "driver": "放款成長、逾期率、沖銷率",
+   "thesis": "高利率加消費放緩，信用品質是關鍵",
+   "etf": "XLF",
+   "tickers": [
+    "COF",
+    "AXP",
+    "SYF"
+   ]
+  },
+  {
+   "sector": "fi",
+   "zh": "資本市場",
+   "en": "Capital Markets",
+   "status": "exp",
+   "structure": "↑",
+   "model": "投行賺承銷與併購顧問；資管按 AUM×費率；交易所賺交易量與數據",
+   "driver": "交易量、AUM、IPO/併購件數",
+   "thesis": "市場波動大推升交易量，IPO 與併購回溫",
+   "etf": "IAI",
+   "tickers": [
+    "GS",
+    "MS",
+    "SCHW",
+    "ICE",
+    "CME",
+    "BX"
+   ]
+  },
+  {
+   "sector": "fi",
+   "zh": "保險",
+   "en": "Insurance",
+   "status": "exp",
+   "structure": "→",
+   "model": "收保費（承保利潤）加上浮存金投資收益",
+   "driver": "費率、綜合比率、投資收益率",
+   "thesis": "利率高推升投資收益；PGR 財報正面。產險費率週期轉軟。KIE 站上 60MA",
+   "etf": "KIE",
+   "tickers": [
+    "PGR",
+    "CB",
+    "TRV",
+    "MET"
+   ]
+  },
+  {
+   "sector": "it",
+   "zh": "半導體",
+   "en": "Semiconductors",
+   "status": "exp",
+   "structure": "↑",
+   "model": "設計（fabless）、代工、記憶體、類比各有模式；AI 加速器與 HBM 為主軸",
+   "driver": "資料中心 capex、記憶體報價、稼動率",
+   "thesis": "Q3 營收 +83%、盈餘 +133%（MU 帶動）。但 SMH 距高點 −24%、60MA 下彎，價格面高檔修正",
+   "etf": "SMH",
+   "tickers": [
+    "NVDA",
+    "TSM",
+    "AVGO",
+    "MU"
+   ]
+  },
+  {
+   "sector": "it",
+   "zh": "半導體設備",
+   "en": "Semiconductor Equipment",
+   "status": "exp",
+   "structure": "↑",
+   "model": "賣晶圓製造設備加上裝機後服務",
+   "driver": "晶圓廠 capex、WFE 預估",
+   "thesis": "AI 與 HBM 擴產帶動 capex；但設備股跌幅大，AMAT、ONTO 距高點近 −48%",
+   "etf": "SMH",
+   "tickers": [
+    "ASML",
+    "AMAT",
+    "LRCX",
+    "KLAC"
+   ]
+  },
+  {
+   "sector": "it",
+   "zh": "應用軟體",
+   "en": "Application Software",
+   "status": "mix",
+   "structure": "→",
+   "model": "SaaS 訂閱，多按使用者席位計價",
+   "driver": "ARR、淨留存率 NRR、RPO",
+   "thesis": "AI agent 減少使用者席位、衝擊席位計價模式；轉型按用量收費的公司較佳",
+   "etf": "IGV",
+   "tickers": [
+    "CRM",
+    "ADBE",
+    "NOW",
+    "INTU"
+   ]
+  },
+  {
+   "sector": "it",
+   "zh": "系統軟體與資安",
+   "en": "Systems Software & Security",
+   "status": "exp",
+   "structure": "↑",
+   "model": "平台訂閱加按用量計價",
+   "driver": "ARR、雲端用量、淨新增 ARR",
+   "thesis": "資安與雲端結構性成長，MSFT、PLTR Q3 亮眼。CIBR 跌破 60MA，屬高檔整理",
+   "etf": "CIBR",
+   "tickers": [
+    "MSFT",
+    "ORCL",
+    "PANW",
+    "CRWD",
+    "NET"
+   ]
+  },
+  {
+   "sector": "it",
+   "zh": "IT 服務",
+   "en": "IT Services",
+   "status": "con",
+   "structure": "↓",
+   "model": "按人力×工時接外包與顧問案",
+   "driver": "訂單、人員利用率、費率",
+   "thesis": "Q3 營收 +5%、盈餘 +8%，皆為科技板塊最低；AI 替代人力外包",
+   "etf": "XLK",
+   "tickers": [
+    "ACN",
+    "IBM",
+    "CTSH"
+   ]
+  },
+  {
+   "sector": "it",
+   "zh": "通訊設備",
+   "en": "Communications Equipment",
+   "status": "exp",
+   "structure": "↑",
+   "model": "交換器、路由器、光通訊設備，硬體加軟體授權",
+   "driver": "雲端 capex、800G/1.6T 出貨",
+   "thesis": "AI 叢集網路擴張；但光通訊股自高點重挫（CIEN −49%）",
+   "etf": "XLK",
+   "tickers": [
+    "ANET",
+    "CSCO",
+    "CIEN"
+   ]
+  },
+  {
+   "sector": "it",
+   "zh": "硬體、儲存與週邊",
+   "en": "Tech Hardware, Storage & Peripherals",
+   "status": "mix",
+   "structure": "↑",
+   "model": "伺服器、PC、手機、硬碟/SSD",
+   "driver": "出貨量、ASP、AI 伺服器占比",
+   "thesis": "AI 伺服器與儲存擴張；PC、手機持平。AAPL 貼近新高，STX 自高點 −42%",
+   "etf": "XLK",
+   "tickers": [
+    "AAPL",
+    "DELL",
+    "SMCI",
+    "STX",
+    "WDC"
+   ]
+  },
+  {
+   "sector": "it",
+   "zh": "電子設備與零件",
+   "en": "Electronic Equipment & Components",
+   "status": "exp",
+   "structure": "↑",
+   "model": "連接器、光纖、測試量測、EMS 代工",
+   "driver": "AI 伺服器出貨、book-to-bill",
+   "thesis": "AI 帶動連接器與光纖需求；GLW、CLS 價格面已重挫",
+   "etf": "XLK",
+   "tickers": [
+    "APH",
+    "GLW",
+    "KEYS",
+    "CLS",
+    "JBL"
+   ]
+  },
+  {
+   "sector": "cm",
+   "zh": "互動媒體與服務",
+   "en": "Interactive Media & Services",
+   "status": "exp",
+   "structure": "↑",
+   "model": "廣告：曝光數×CPM；搜尋加社群",
+   "driver": "廣告營收、使用者時長、capex",
+   "thesis": "Q3 營收 +25% 為通訊服務最高；AI 提升廣告投放效率，但 capex 擔憂壓股價",
+   "etf": "XLC",
+   "tickers": [
+    "GOOGL",
+    "META"
+   ]
+  },
+  {
+   "sector": "cm",
+   "zh": "娛樂",
+   "en": "Entertainment",
+   "status": "exp",
+   "structure": "↑",
+   "model": "串流：訂戶×ARPU 加廣告方案；遊戲：買斷加內購",
+   "driver": "訂戶數、ARPU、廣告方案滲透",
+   "thesis": "串流龍頭擴張，靠漲價與廣告方案",
+   "etf": "XLC",
+   "tickers": [
+    "NFLX",
+    "DIS",
+    "TTWO"
+   ]
+  },
+  {
+   "sector": "cm",
+   "zh": "傳統媒體",
+   "en": "Media",
+   "status": "con",
+   "structure": "↓",
+   "model": "有線電視授權費、廣告代理",
+   "driver": "訂戶流失、廣告支出",
+   "thesis": "剪線潮延續，結構性衰退",
+   "etf": "XLC",
+   "tickers": [
+    "CMCSA",
+    "OMC"
+   ]
+  },
+  {
+   "sector": "cm",
+   "zh": "綜合電信",
+   "en": "Diversified Telecom",
+   "status": "con",
+   "structure": "→",
+   "model": "寬頻與光纖月費",
+   "driver": "寬頻淨增戶、ARPU",
+   "thesis": "Q3 營收成長不到 1%；固網寬頻被 5G FWA 侵蝕",
+   "etf": "XTL",
+   "tickers": [
+    "T",
+    "VZ"
+   ]
+  },
+  {
+   "sector": "cm",
+   "zh": "無線電信",
+   "en": "Wireless Telecom",
+   "status": "flat",
+   "structure": "→",
+   "model": "行動門號月費",
+   "driver": "後付淨增戶、流失率",
+   "thesis": "三強寡占，成長平緩",
+   "etf": "XLC",
+   "tickers": [
+    "TMUS"
+   ]
+  },
+  {
+   "sector": "ut",
+   "zh": "電力公用事業",
+   "en": "Electric Utilities",
+   "status": "exp",
+   "structure": "↑",
+   "model": "受管制：費率基礎 rate base × 核准 ROE",
+   "driver": "費率基礎成長、用電量、費率案",
+   "thesis": "資料中心用電推升 rate base 與 capex；但 XLU 60MA 下彎",
+   "etf": "XLU",
+   "tickers": [
+    "NEE",
+    "SO",
+    "DUK"
+   ]
+  },
+  {
+   "sector": "ut",
+   "zh": "獨立發電與再生能源",
+   "en": "IPPs & Renewables",
+   "status": "mix",
+   "structure": "↑",
+   "model": "市場電價加上 PPA 長約",
+   "driver": "電價、PPA 簽約、容量價格",
+   "thesis": "核電/燃氣發電與科技公司簽 PPA 擴張；太陽能 TAN 距高點 −41%",
+   "etf": "TAN",
+   "tickers": [
+    "CEG",
+    "VST",
+    "TLN"
+   ]
+  },
+  {
+   "sector": "ut",
+   "zh": "燃氣、水務與綜合",
+   "en": "Gas, Water & Multi-Utilities",
+   "status": "flat",
+   "structure": "→",
+   "model": "受管制費率",
+   "driver": "費率基礎、費率案",
+   "thesis": "防禦型、利率敏感",
+   "etf": "XLU",
+   "tickers": [
+    "AWK",
+    "ATO"
+   ]
+  },
+  {
+   "sector": "re",
+   "zh": "資料中心 REIT",
+   "en": "Data Center REITs",
+   "status": "exp",
+   "structure": "↑",
+   "model": "按 MW 出租機櫃與電力，加上互連費",
+   "driver": "新簽約 MW、租金、空置率",
+   "thesis": "AI 需求帶動；DTCR 距高點 −20%，價格面修正",
+   "etf": "DTCR",
+   "tickers": [
+    "EQIX",
+    "DLR"
+   ]
+  },
+  {
+   "sector": "re",
+   "zh": "住宅 REIT",
+   "en": "Residential REITs",
+   "status": "exp",
+   "structure": "→",
+   "model": "公寓與獨棟出租，收租金",
+   "driver": "續約租金漲幅、出租率",
+   "thesis": "買房負擔過高，轉為租屋需求；REZ 站上 60MA 且上揚",
+   "etf": "REZ",
+   "tickers": [
+    "MAA",
+    "ESS",
+    "UDR",
+    "INVH"
+   ]
+  },
+  {
+   "sector": "re",
+   "zh": "工業物流 REIT",
+   "en": "Industrial REITs",
+   "status": "flat",
+   "structure": "→",
+   "model": "倉儲物流中心出租",
+   "driver": "租金價差、空置率、新供給",
+   "thesis": "前幾年新供給仍在消化",
+   "etf": "INDS",
+   "tickers": [
+    "PLD"
+   ]
+  },
+  {
+   "sector": "re",
+   "zh": "醫療與養老 REIT",
+   "en": "Health Care REITs",
+   "status": "exp",
+   "structure": "↑",
+   "model": "養老院、醫療大樓出租或共同營運",
+   "driver": "入住率、RevPOR、新供給",
+   "thesis": "讀本案例：嬰兒潮 2030 需求，加上新供給接近 0",
+   "etf": "REZ",
+   "tickers": [
+    "WELL",
+    "VTR"
+   ]
+  },
+  {
+   "sector": "re",
+   "zh": "辦公室 REIT",
+   "en": "Office REITs",
+   "status": "con",
+   "structure": "↓",
+   "model": "辦公大樓出租",
+   "driver": "出租率、續約租金",
+   "thesis": "遠距工作結構性衰退；再融資壓力",
+   "etf": "VNQ",
+   "tickers": [
+    "BXP"
+   ]
+  },
+  {
+   "sector": "re",
+   "zh": "專業 REIT（電塔、倉儲）",
+   "en": "Specialized REITs",
+   "status": "flat",
+   "structure": "→",
+   "model": "電塔按天線數出租；自助倉儲按月收租",
+   "driver": "租戶數、搬家需求",
+   "thesis": "電塔成長放緩；自助倉儲受搬家少拖累",
+   "etf": "VNQ",
+   "tickers": [
+    "AMT",
+    "CCI",
+    "PSA"
+   ]
+  },
+  {
+   "sector": "re",
+   "zh": "零售 REIT",
+   "en": "Retail REITs",
+   "status": "flat",
+   "structure": "→",
+   "model": "購物中心、街邊店收租加營收抽成",
+   "driver": "出租率、租戶銷售",
+   "thesis": "高端商場穩、低端承壓",
+   "etf": "VNQ",
+   "tickers": [
+    "SPG",
+    "O"
+   ]
+  },
+  {
+   "sector": "re",
+   "zh": "不動產服務",
+   "en": "Real Estate Management & Services",
+   "status": "flat",
+   "structure": "→",
+   "model": "交易佣金加物業管理費",
+   "driver": "商用不動產交易量",
+   "thesis": "交易量隨利率走，10Y 約 5% 壓抑交易",
+   "etf": "VNQ",
+   "tickers": [
+    "CBRE"
+   ]
+  }
+ ]
+}
