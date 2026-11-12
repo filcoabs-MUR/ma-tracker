@@ -108,7 +108,7 @@
    "structure": "→",
    "model": "賣原油、天然氣；營收＝產量×價格，成本為每桶開採成本",
    "driver": "油價、天然氣價、每桶成本、資本紀律",
-   "thesis": "油價約 $96–104 支撐現金流；但 XOP 已跌破 60MA，市場開始定價油價回落",
+   "thesis": "油價約 $96–104 支撐現金流；但 XOP 已跌破 50MA，市場開始定價油價回落",
    "etf": "XOP",
    "tickers": [
     "COP",
@@ -124,7 +124,7 @@
    "structure": "→",
    "model": "買原油、賣汽柴油，賺裂解價差（crack spread）",
    "driver": "裂解價差、煉油利用率",
-   "thesis": "Q3 盈餘 +542% 全市場最高；PSX 煉油毛利 $38/桶、利用率 98%。CRAK 距 60MA −9%，屬週期頂部特徵",
+   "thesis": "Q3 盈餘 +542% 全市場最高；PSX 煉油毛利 $38/桶、利用率 98%。CRAK 距 50MA −10%，屬週期頂部特徵",
    "etf": "CRAK",
    "tickers": [
     "VLO",
@@ -157,7 +157,7 @@
    "structure": "↑",
    "model": "賣燃料給電廠；鈾以多年長約為主",
    "driver": "鈾長約價、核電新建/延役",
-   "thesis": "核能是 AI 電力的長線題材，但 URA 距高點 −46%、跌破 60MA 16%，價格面已收縮",
+   "thesis": "核能是 AI 電力的長線題材，但 URA 距高點 −46%、跌破 50MA 13%，價格面已收縮",
    "etf": "URA",
    "tickers": [
     "CCJ"
@@ -234,7 +234,7 @@
    "structure": "↑",
    "model": "價格接受者：銅、金、鋼、鋁，營收＝產量×商品價",
    "driver": "商品價格、產量、單位成本",
-   "thesis": "Q3 盈餘 +56% 為原物料最高；銅受惠電網與 AI。但 COPX、XME、GDX 都跌破 60MA，價格面轉弱",
+   "thesis": "Q3 盈餘 +56% 為原物料最高；銅受惠電網與 AI。但 COPX、XME、GDX 都跌破 50MA，價格面轉弱",
    "etf": "XME",
    "tickers": [
     "FCX",
@@ -427,7 +427,7 @@
    "structure": "→",
    "model": "票價×座位×載客率；高端艙等與聯名卡貢獻利潤",
    "driver": "單位營收 RASM、燃油成本、載客率",
-   "thesis": "高油價壓燃料成本；高端旅遊強、經濟艙弱。JETS 近期反彈站上 60MA",
+   "thesis": "高油價壓燃料成本；高端旅遊強、經濟艙弱。JETS 近期反彈站上 50MA",
    "etf": "JETS",
    "tickers": [
     "DAL",
@@ -489,7 +489,7 @@
    "structure": "→",
    "model": "建商賣房賺毛利；家電、家具賣耐久品",
    "driver": "新屋訂單、取消率、購屋激勵",
-   "thesis": "10Y 約 5%、成屋銷售低於 400 萬戶。ITB 站上 60MA，但 60MA 仍下彎、距高點 −16%",
+   "thesis": "10Y 約 5%、成屋銷售低於 400 萬戶。ITB 站上 50MA 且 50MA 上揚，但距高點 −16%",
    "etf": "ITB",
    "tickers": [
     "DHI",
@@ -696,7 +696,7 @@
    "structure": "↑",
    "model": "設備銷售加耗材的刀片模式；裝機量帶動耗材",
    "driver": "手術量、裝機量、耗材營收",
-   "thesis": "高齡化帶動手術量；IHI 站上 60MA 且 60MA 上揚",
+   "thesis": "高齡化帶動手術量；IHI 站上 50MA 且 50MA 上揚",
    "etf": "IHI",
    "tickers": [
     "ISRG",
@@ -712,7 +712,7 @@
    "structure": "→",
    "model": "保險：按人頭收保費，看醫療損失率；醫院：按服務量收費；PBM 抽藥價差",
    "driver": "醫療損失率 MLR、就診量、會員數",
-   "thesis": "醫療利用率高：醫院受惠、保險商 MLR 承壓。IHF 站上 60MA",
+   "thesis": "醫療利用率高：醫院受惠、保險商 MLR 承壓。IHF 站上 50MA",
    "etf": "IHF",
    "tickers": [
     "UNH",
@@ -743,7 +743,7 @@
    "structure": "↑",
    "model": "研發管線加授權；上市藥靠專利期內定價",
    "driver": "臨床數據、FDA 審批、併購",
-   "thesis": "利率高不利融資；併購活躍。XBI 貼近 60MA",
+   "thesis": "利率高不利融資；併購活躍。XBI 貼近 50MA",
    "etf": "XBI",
    "tickers": [
     "VRTX",
@@ -759,7 +759,7 @@
    "structure": "↑",
    "model": "專利期內高定價，到期後面臨專利懸崖",
    "driver": "新藥銷售、專利到期、藥價政策",
-   "thesis": "GLP-1 減重藥需求擴張；藥價政策仍是變數。PPH 站上 60MA",
+   "thesis": "GLP-1 減重藥需求擴張；藥價政策仍是變數。PPH 站上 50MA",
    "etf": "PPH",
    "tickers": [
     "LLY",
@@ -858,7 +858,7 @@
    "structure": "→",
    "model": "收保費（承保利潤）加上浮存金投資收益",
    "driver": "費率、綜合比率、投資收益率",
-   "thesis": "利率高推升投資收益；PGR 財報正面。產險費率週期轉軟。KIE 站上 60MA",
+   "thesis": "利率高推升投資收益；PGR 財報正面。產險費率週期轉軟。KIE 站上 50MA",
    "etf": "KIE",
    "tickers": [
     "PGR",
@@ -875,7 +875,7 @@
    "structure": "↑",
    "model": "設計（fabless）、代工、記憶體、類比各有模式；AI 加速器與 HBM 為主軸",
    "driver": "資料中心 capex、記憶體報價、稼動率",
-   "thesis": "Q3 營收 +83%、盈餘 +133%（MU 帶動）。但 SMH 距高點 −24%、60MA 下彎，價格面高檔修正",
+   "thesis": "Q3 營收 +83%、盈餘 +133%（MU 帶動）。但 SMH 距高點 −24%、50MA 下彎，價格面高檔修正",
    "etf": "SMH",
    "tickers": [
     "NVDA",
@@ -926,7 +926,7 @@
    "structure": "↑",
    "model": "平台訂閱加按用量計價",
    "driver": "ARR、雲端用量、淨新增 ARR",
-   "thesis": "資安與雲端結構性成長，MSFT、PLTR Q3 亮眼。CIBR 跌破 60MA，屬高檔整理",
+   "thesis": "資安與雲端結構性成長，MSFT、PLTR Q3 亮眼。CIBR 跌破 50MA，屬高檔整理",
    "etf": "CIBR",
    "tickers": [
     "MSFT",
@@ -1087,7 +1087,7 @@
    "structure": "↑",
    "model": "受管制：費率基礎 rate base × 核准 ROE",
    "driver": "費率基礎成長、用電量、費率案",
-   "thesis": "資料中心用電推升 rate base 與 capex；但 XLU 60MA 下彎",
+   "thesis": "資料中心用電推升 rate base 與 capex；XLU 站上 50MA 且 50MA 上揚",
    "etf": "XLU",
    "tickers": [
     "NEE",
@@ -1149,7 +1149,7 @@
    "structure": "→",
    "model": "公寓與獨棟出租，收租金",
    "driver": "續約租金漲幅、出租率",
-   "thesis": "買房負擔過高，轉為租屋需求；REZ 站上 60MA 且上揚",
+   "thesis": "買房負擔過高，轉為租屋需求；REZ 站上 50MA 且上揚",
    "etf": "REZ",
    "tickers": [
     "MAA",

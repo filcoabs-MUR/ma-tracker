@@ -144,7 +144,7 @@ footer ul{padding-left:1.2em}
 
 <section>
   <h2>板塊總覽</h2>
-  <p class="sub">色條是該板塊各行業的狀態比例；下方數字是板塊 ETF 距 60 日均線（台股慣例：紅＝在線上，綠＝在線下）。點一下板塊可篩選下方卡片。</p>
+  <p class="sub">色條是該板塊各行業的狀態比例；下方數字是板塊 ETF 距 50 日均線（台股慣例：紅＝在線上，綠＝在線下）。點一下板塊可篩選下方卡片。</p>
   <div class="sectors" id="sectors"></div>
   <div class="legend">
     <span><span class="pill p-exp">擴張</span> TAM 成長＋當季營運/指引向上</span>
@@ -198,7 +198,7 @@ footer ul{padding-left:1.2em}
 </section>
 
 <footer>
-  <p><b>欄位說明</b>　模式＝商業模式（賣什麼、向誰收錢）；驅動＝營收驅動因子與該看的行業 KPI；判斷＝擴張或收縮的理由。結構箭頭是 3–5 年 TAM 方向，狀態標籤是當前週期。ETF 一欄格式為「代號 距60MA%（60MA 方向）」。</p>
+  <p><b>欄位說明</b>　模式＝商業模式（賣什麼、向誰收錢）；驅動＝營收驅動因子與該看的行業 KPI；判斷＝擴張或收縮的理由。結構箭頭是 3–5 年 TAM 方向，狀態標籤是當前週期。ETF 一欄格式為「代號 距50MA%（50MA 方向）」。</p>
   <p><b>資料來源</b></p>
   <ul>
     <li><a href="https://advantage.factset.com/hubfs/Website/Resources%20Section/Research%20Desk/Earnings%20Insight/EarningsInsight_110626.pdf" target="_blank" rel="noopener">FactSet Earnings Insight 2026-11-06</a>（各板塊 Q3 營收/盈餘成長）</li>
@@ -213,9 +213,9 @@ footer ul{padding-left:1.2em}
 
 <script>
 const DATA=/*__DATA__*/null;
-// SECTORS: [key, 中文, English, ETF, 距60MA%, 60MA方向]
+// SECTORS: [key, 中文, English, ETF, 距50MA%, 50MA方向]
 const SECTORS=DATA.sectors;
-// D: [sector, 名稱, English, 狀態, 結構, 模式, 驅動, 判斷, ETF, 距60MA%, 60MA方向, 代表股]
+// D: [sector, 名稱, English, 狀態, 結構, 模式, 驅動, 判斷, ETF, 距50MA%, 50MA方向, 代表股]
 const D=DATA.D;
 document.querySelectorAll(".asof").forEach(e=>e.textContent=DATA.asof);
 
@@ -227,11 +227,11 @@ const pct=v=>`<span class="${v>0?"u":"d"}">${v>0?"+":""}${v.toFixed(1)}%</span>`
 const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 function renderSectors(){
-  document.getElementById("sectors").innerHTML=SECTORS.map(([k,zh,en,etf,v60,dir])=>{
+  document.getElementById("sectors").innerHTML=SECTORS.map(([k,zh,en,etf,v50,dir])=>{
     const rows=D.filter(r=>r[0]===k),n=rows.length;
     const seg=["exp","mix","flat","con"].map(s=>{const c=rows.filter(r=>r[3]===s).length;return c?`<i style="width:${c/n*100}%;background:${ST[s][2]}" title="${ST[s][0]} ${c}"></i>`:""}).join("");
     const e=rows.filter(r=>r[3]==="exp").length,c=rows.filter(r=>r[3]==="con").length;
-    return `<button class="sec${fSec===k?" on":""}" data-k="${k}" aria-pressed="${fSec===k}"><div class="nm">${zh}<span>${n} 行業</span></div><div class="bar">${seg}</div><div class="px">擴張 ${e} · 收縮 ${c}　${etf} ${pct(v60)} ${dir}</div></button>`;
+    return `<button class="sec${fSec===k?" on":""}" data-k="${k}" aria-pressed="${fSec===k}"><div class="nm">${zh}<span>${n} 行業</span></div><div class="bar">${seg}</div><div class="px">擴張 ${e} · 收縮 ${c}　${etf} ${pct(v50)} ${dir}</div></button>`;
   }).join("");
   document.querySelectorAll(".sec").forEach(b=>b.onclick=()=>{fSec=fSec===b.dataset.k?null:b.dataset.k;save();renderSectors();renderList();document.getElementById("list").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth",block:"start"});});
 }
@@ -241,15 +241,15 @@ function renderList(){
   const rows=D.filter(r=>(!fSec||r[0]===fSec)&&(fSt==="all"||r[3]===fSt)&&(!q||r.join(" ").toLowerCase().includes(q)));
   document.getElementById("count").textContent=`${rows.length} / ${D.length} 行業`;
   if(!rows.length){document.getElementById("list").innerHTML='<p class="empty">沒有符合的行業，換個關鍵字或清除篩選。</p>';return;}
-  document.getElementById("list").innerHTML=SECTORS.filter(s=>rows.some(r=>r[0]===s[0])).map(([k,zh,en,etf,v60])=>{
+  document.getElementById("list").innerHTML=SECTORS.filter(s=>rows.some(r=>r[0]===s[0])).map(([k,zh,en,etf,v50])=>{
     const g=rows.filter(r=>r[0]===k);
-    return `<div class="group"><h3>${zh}<span>${en} · ${etf} ${v60>0?"+":""}${v60.toFixed(1)}% vs 60MA</span></h3><div class="cards">${g.map(r=>{
+    return `<div class="group"><h3>${zh}<span>${en} · ${etf} ${v50>0?"+":""}${v50.toFixed(1)}% vs 50MA</span></h3><div class="cards">${g.map(r=>{
       const [_,zhN,enN,st,str,model,drv,why,e,v,dir,tks]=r;
       return `<article class="card"><div class="top"><b>${esc(zhN)}<small>${esc(enN)}</small></b><span class="pill ${ST[st][1]}">${ST[st][0]}</span></div>
       <div class="row"><span>模式</span><span>${esc(model)}</span></div>
       <div class="row"><span>驅動</span><span>${esc(drv)}</span></div>
       <div class="row"><span>判斷</span><span>${esc(why)}</span></div>
-      <div class="foot"><span class="struct">結構 ${str}</span><span class="etf">${e} ${pct(v)} (60MA${dir})</span>${tks.split(" ").map(t=>`<span class="tk">${t}</span>`).join("")}</div></article>`}).join("")}</div></div>`;
+      <div class="foot"><span class="struct">結構 ${str}</span><span class="etf">${e} ${pct(v)} (50MA${dir})</span>${tks.split(" ").map(t=>`<span class="tk">${t}</span>`).join("")}</div></article>`}).join("")}</div></div>`;
   }).join("");
 }
 

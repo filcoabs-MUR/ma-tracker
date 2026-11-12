@@ -10,7 +10,7 @@ industry_map.py — 美股行業地圖（每日盤後更新均線）
   output/industry_ma.csv      各行業 50MA 數據
   output/industry_ma_history.csv  每日累積
 
-計算：每檔 距20MA%、距50MA%、50MA 方向（近 5 日）、距60MA%、60MA 方向
+計算：每檔 距20MA%、距50MA%、50MA 方向（近 5 日）
 用法：python industry_map.py [--open]
 僅為數據整理，不構成投資建議。
 """
@@ -86,14 +86,12 @@ def stats(c: pd.Series) -> dict | None:
     if (pd.Timestamp.now() - last).days > 10:
         return None
     p = c.iloc[-1]
-    ma20, ma50, ma60 = (c.rolling(n).mean() for n in (20, 50, 60))
+    ma20, ma50 = (c.rolling(n).mean() for n in (20, 50))
     return {
         "date": c.index[-1].strftime("%Y-%m-%d"),
         "vs20": round((p / ma20.iloc[-1] - 1) * 100, 1),
         "vs50": round((p / ma50.iloc[-1] - 1) * 100, 1),
         "up50": int(ma50.iloc[-1] > ma50.iloc[-6]),
-        "vs60": round((p / ma60.iloc[-1] - 1) * 100, 1),
-        "up60": ma60.iloc[-1] > ma60.iloc[-6],
     }
 
 
@@ -123,7 +121,7 @@ def main() -> int:
 
     def etf_tuple(e: str) -> tuple[float, str]:
         s = S.get(e)
-        return (s["vs60"], "↑" if s["up60"] else "↓") if s else (0.0, "–")
+        return (s["vs50"], "↑" if s["up50"] else "↓") if s else (0.0, "–")
 
     data = {
         "asof": asof,
