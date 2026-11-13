@@ -881,7 +881,9 @@
     "NVDA",
     "TSM",
     "AVGO",
-    "MU"
+    "MU",
+    "AMD",
+    "INTC"
    ]
   },
   {
@@ -890,7 +892,7 @@
    "en": "Semiconductor Equipment",
    "status": "exp",
    "structure": "↑",
-   "model": "賣晶圓製造設備加上裝機後服務",
+   "model": "賣晶圓製造、檢測量測與晶片測試設備，加上裝機後服務",
    "driver": "晶圓廠 capex、WFE 預估",
    "thesis": "AI 與 HBM 擴產帶動 capex；但設備股跌幅大，AMAT、ONTO 距高點近 −48%",
    "etf": "SMH",
@@ -898,7 +900,8 @@
     "ASML",
     "AMAT",
     "LRCX",
-    "KLAC"
+    "KLAC",
+    "TER"
    ]
   },
   {
