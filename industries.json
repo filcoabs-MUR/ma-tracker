@@ -701,7 +701,11 @@
    "tickers": [
     "ISRG",
     "SYK",
-    "BSX"
+    "BSX",
+    "ABT",
+    "MDT",
+    "BDX",
+    "EW"
    ]
   },
   {
@@ -718,7 +722,9 @@
     "UNH",
     "ELV",
     "HCA",
-    "CVS"
+    "CVS",
+    "THC",
+    "UHS"
    ]
   },
   {
@@ -1181,13 +1187,17 @@
    "en": "Health Care REITs",
    "status": "exp",
    "structure": "↑",
-   "model": "養老院、醫療大樓出租或共同營運",
+   "model": "養老院、醫院與門診大樓、生命科學實驗室出租或共同營運",
    "driver": "入住率、RevPOR、新供給",
    "thesis": "讀本案例：嬰兒潮 2030 需求，加上新供給接近 0",
    "etf": "REZ",
    "tickers": [
     "WELL",
-    "VTR"
+    "VTR",
+    "DOC",
+    "OHI",
+    "HR",
+    "CHCT"
    ]
   },
   {
