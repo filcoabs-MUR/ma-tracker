@@ -1,0 +1,35 @@
+{
+  "as_of": "2026-11-20",
+  "close": 36033.29,
+  "change_pct": -6.23,
+  "ma20": 42720.0,
+  "ma60": 45711.0,
+  "ma240": 39408.0,
+  "ma240_slope5": 255.0,
+  "dist_ma240": 3375.0,
+  "dist_ma240_pct": 9.37,
+  "bias_ma20_pct": -15.65,
+  "scenario": "RALLY",
+  "scenario_text": "反彈進行中／整理中",
+  "reason": "距年線還有 3,375 點",
+  "pivot_low": 35738.6796875,
+  "pivot_date": "2026-11-20",
+  "rally_day": null,
+  "rally_day1": null,
+  "ftd_today": false,
+  "ftd_date": null,
+  "volume_available": false,
+  "oi_anchor": null,
+  "oi_today": null,
+  "oi_change": null,
+  "levels": {
+    "anchor_low": 35739.0,
+    "prior_low": 37837.0,
+    "fib_0382": 41174.0,
+    "support_zone": [
+      33000.0,
+      34000.0
+    ]
+  },
+  "prev_scenario": null
+}
