@@ -210,3 +210,59 @@ def test_chart_drops_scenarios_after_25_days():
     svg = tr.to_svg_chart(d, anchor_date=anchor)
     assert svg.count("<polyline") == 4
     assert "A 遇壓回測" not in svg
+
+
+# ---- 證交所 API 解析（欄位與數值取自證交所 2026/10 實際回應）------------------
+VALUE_JS = {"stat": "OK", "fields": ["Date", "Trade Volume", "Trade Value", "Transaction", "TAIEX", "Change"],
+            "data": [["2026/10/01", "10,691,867,330", "874,046,252,416", "4,715,278", "48,353.49", "413.36"],
+                     ["2026/10/02", "11,017,717,304", "938,222,196,327", "4,612,433", "48,475.74", "122.25"]]}
+OHLC_JS = {"stat": "OK", "fields": ["Date", "Opening Index", "Highest Index", "Lowest Index", "Closing Index"],
+           "data": [["2026/10/01", "47,961.98", "48,353.49", "47,893.42", "48,353.49"],
+                    ["2026/10/02", "48,390.65", "48,491.62", "48,205.81", "48,475.74"]]}
+
+
+def test_parse_twse_value_in_billion():
+    v = tr.parse_twse_value(VALUE_JS)
+    assert v[pd.Timestamp("2026-10-01")] == pytest.approx(8740.46, abs=0.01)
+
+
+def test_parse_twse_ohlc_and_roc_dates():
+    o = tr.parse_twse_ohlc(OHLC_JS)
+    assert o.loc["2026-10-02", "low"] == 48205.81
+    zh = {"stat": "OK", "fields": ["日期", "開盤指數", "最高指數", "最低指數", "收盤指數"],
+          "data": [["115/10/01", "47,961.98", "48,353.49", "47,893.42", "48,353.49"]]}
+    assert tr.parse_twse_ohlc(zh).index[0] == pd.Timestamp("2026-10-01")
+
+
+def test_parse_twse_no_data_month():
+    assert tr.parse_twse_ohlc({"stat": "很抱歉，沒有符合條件的資料!"}).empty
+
+
+def test_fetch_twse_merges_months_with_volume():
+    def fake_get(url):
+        ym = url.split("date=")[1][:6]
+        y, m = int(ym[:4]), int(ym[4:])
+        days = pd.bdate_range(f"{y}-{m:02d}-01", periods=20)
+        rows = [[d.strftime("%Y/%m/%d"), "40,000", "40,100", "39,900", f"{40000 + i:,}"] for i, d in enumerate(days)]
+        if "FMTQIK" in url:
+            return {"stat": "OK", "fields": VALUE_JS["fields"],
+                    "data": [[r[0], "1", f"{(900 + i) * 10**8:,}", "1", r[4], "0"] for i, r in enumerate(rows)]}
+        return {"stat": "OK", "fields": OHLC_JS["fields"], "data": rows}
+
+    df = tr.fetch_twse(months=14, get=fake_get, pause=0, today=pd.Timestamp("2026-11-20"))
+    assert len(df) == 14 * 20 and df.index.is_monotonic_increasing
+    assert df["volume"].notna().all() and df["volume"].iloc[0] == pytest.approx(900)
+    r = tr.evaluate(df, anchor_date=df.index[-5].strftime("%Y-%m-%d"), anchor_low=30000)
+    assert r.volume_available is True
+
+
+def test_main_falls_back_to_yahoo(tmp_path, monkeypatch):
+    df, anchor = build(ABOVE3)
+    monkeypatch.setattr(tr, "fetch_twse", lambda: (_ for _ in ()).throw(RuntimeError("down")))
+    monkeypatch.setattr(tr, "fetch_yf", lambda: df)
+    monkeypatch.setattr(tr, "ANCHOR_DATE", anchor)
+    monkeypatch.setattr(tr, "ANCHOR_LOW", ANCHOR_LOW)
+    assert tr.main(["--out", str(tmp_path)]) == 0
+    d = json.loads((tmp_path / "taiex_rebound.json").read_text(encoding="utf-8"))
+    assert d["source"] == "yahoo"
+    assert "備援" in tr.to_html_card(d)

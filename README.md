@@ -13,7 +13,7 @@
 
 ```bash
 python -m pytest -q tests                                  # 規則測試
-python taiex_rebound.py                                    # yfinance 抓 ^TWII
+python taiex_rebound.py                                    # 證交所 API（失敗才改用 Yahoo ^TWII）
 python taiex_rebound.py --csv daily.csv --oi-anchor 99438 --oi-today 90000
 ```
 

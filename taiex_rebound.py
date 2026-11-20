@@ -115,6 +115,76 @@ def fetch_yf(period: str = "2y") -> pd.DataFrame:
     return normalize(raw)
 
 
+# ---- 證交所 API（GitHub Actions 用；英文版日期為西元）---------------------------
+TWSE_OHLC = "https://www.twse.com.tw/rwd/en/TAIEX/MI_5MINS_HIST?date={ym}01&response=json"
+TWSE_VALUE = "https://www.twse.com.tw/rwd/en/afterTrading/FMTQIK?date={ym}01&response=json"
+
+
+def _num(x) -> float:
+    return float(str(x).replace(",", "").strip())
+
+
+def _date(x: str) -> pd.Timestamp:
+    y, m, d = str(x).strip().split("/")
+    y = int(y)
+    return pd.Timestamp(y + 1911 if y < 1911 else y, int(m), int(d))
+
+
+def _col(fields: list[str], *keys: str) -> int:
+    for i, f in enumerate(fields):
+        fl = str(f).lower()
+        if any(k in fl for k in keys):
+            return i
+    raise ValueError(f"證交所欄位找不到 {keys}：{fields}")
+
+
+def parse_twse_ohlc(js: dict) -> pd.DataFrame:
+    if js.get("stat") != "OK" or not js.get("data"):
+        return pd.DataFrame()
+    f = js["fields"]
+    io, ih, il, ic = (_col(f, "open", "開盤"), _col(f, "high", "最高"),
+                      _col(f, "low", "最低"), _col(f, "clos", "收盤"))
+    rows = [(_date(r[0]), _num(r[io]), _num(r[ih]), _num(r[il]), _num(r[ic])) for r in js["data"]]
+    return pd.DataFrame(rows, columns=["date", "open", "high", "low", "close"]).set_index("date")
+
+
+def parse_twse_value(js: dict) -> pd.Series:
+    if js.get("stat") != "OK" or not js.get("data"):
+        return pd.Series(dtype=float)
+    iv = _col(js["fields"], "trade value", "成交金額")
+    return pd.Series({_date(r[0]): _num(r[iv]) / 1e8 for r in js["data"]}, name="volume")
+
+
+def fetch_twse(months: int = 14, get=None, pause: float = 1.5, today: pd.Timestamp | None = None) -> pd.DataFrame:
+    """抓加權指數日線（開高低收）＋成交金額（億），約 14 個月以滿足年線。get 可注入以便測試。"""
+    import time
+
+    if get is None:
+        import requests
+
+        sess = requests.Session()
+        sess.headers["User-Agent"] = "Mozilla/5.0 (ma-tracker)"
+
+        def get(url):
+            r = sess.get(url, timeout=20)
+            r.raise_for_status()
+            return r.json()
+
+    today = pd.Timestamp.today().normalize() if today is None else today
+    ohlc, val = [], []
+    for k in range(months - 1, -1, -1):
+        ym = (today - pd.DateOffset(months=k)).strftime("%Y%m")
+        ohlc.append(parse_twse_ohlc(get(TWSE_OHLC.format(ym=ym))))
+        if pause:
+            time.sleep(pause)
+        val.append(parse_twse_value(get(TWSE_VALUE.format(ym=ym))))
+        if pause:
+            time.sleep(pause)
+    df = pd.concat([d for d in ohlc if not d.empty])
+    df["volume"] = pd.concat([v for v in val if not v.empty]).reindex(df.index)
+    return normalize(df)
+
+
 def normalize(df: pd.DataFrame) -> pd.DataFrame:
     need = ["open", "high", "low", "close"]
     missing = [c for c in need if c not in df.columns]
@@ -404,6 +474,12 @@ def to_svg_chart(d: dict, anchor_date: str | None = None) -> str:
             + ("<p class='fn' style='margin-top:2px'>劇本線為 11/20 當天畫的示意路徑，不是預測；錨點後 25 個交易日自動移除。</p>" if scen else ""))
 
 
+SOURCE_NOTE = {
+    "twse": "資料：證交所（含成交金額）；網頁未含外資期貨籌碼，B 劇本最多判到「價格達標」，完整判讀見盤後排程。",
+    "csv": "資料：自備日線。",
+    "yahoo": "資料：Yahoo ^TWII（證交所 API 當日失敗時的備援，無量能與籌碼）；完整判讀以盤後排程為準。",
+}
+
 PILL = {"C": "hv", "B": "ok", "ABOVE": "ok", "B_PRICE_ONLY": "md", "A": "md", "RALLY": "lt"}
 
 
@@ -440,7 +516,8 @@ def to_html_card(d: dict) -> str:
         f"關鍵價位：年線 {d['ma240']:,.0f}／0.382 回撤 {lv['fib_0382']:,.0f}／前低 {lv['prior_low']:,.0f}／"
         f"錨點低 {lv['anchor_low']:,.0f}／支撐區 {lv['support_zone'][0]:,.0f}～{lv['support_zone'][1]:,.0f}<br>"
         "劇本：A 年線遇壓回測｜B 站穩年線 3 日且外資空單減少 1 萬口｜C 跌破錨點低點。"
-        "網頁版用 Yahoo ^TWII，無量能與籌碼；完整判讀以盤後排程（證交所資料）為準。僅數據整理，非投資建議。</p></div>"
+        + SOURCE_NOTE.get(d.get("source"), SOURCE_NOTE["yahoo"])
+        + "僅數據整理，非投資建議。</p></div>"
     )
 
 
@@ -452,7 +529,14 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--out", default="output", help="輸出資料夾")
     a = ap.parse_args(argv)
 
-    df = load_csv(a.csv) if a.csv else fetch_yf()
+    if a.csv:
+        df, source = load_csv(a.csv), "csv"
+    else:
+        try:
+            df, source = fetch_twse(), "twse"
+        except Exception as ex:  # 證交所失敗才退回 Yahoo
+            print(f"證交所 API 失敗，改用 Yahoo：{ex}")
+            df, source = fetch_yf(), "yahoo"
     r = evaluate(df, a.oi_anchor, a.oi_today)
 
     out = Path(a.out)
@@ -468,7 +552,7 @@ def main(argv: list[str] | None = None) -> int:
                 prev = old.get("prev_scenario")
         except (json.JSONDecodeError, OSError):
             prev = None
-    payload = asdict(r) | {"prev_scenario": prev, "series": chart_series(df)}
+    payload = asdict(r) | {"prev_scenario": prev, "series": chart_series(df), "source": source}
     jpath.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     md = to_markdown(r, prev)
     (out / "taiex_rebound.md").write_text(md + "\n", encoding="utf-8")
