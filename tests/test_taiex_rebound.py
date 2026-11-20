@@ -174,3 +174,16 @@ def test_fib_0382_is_rebound_from_low():
     df, anchor = build([(36500, 35000, 35500, None)])
     r = tr.evaluate(df, anchor_date=anchor, anchor_low=35739.0)
     assert r.levels["fib_0382"] == pytest.approx(35739 + (49968 - 35739) * 0.382, abs=1)
+
+
+def test_html_card_renders_and_escapes():
+    df, anchor = build(ABOVE3)
+    r = tr.evaluate(df, anchor_date=anchor, anchor_low=ANCHOR_LOW)
+    d = json.loads(json.dumps(tr.asdict(r)))
+    d["reason"] = "<script>x</script>"
+    h = tr.to_html_card(d)
+    assert "id='taiex'" in h and "年線 MA240" in h
+    assert "<script>" not in h and "&lt;script&gt;" in h
+    assert "pill md" in h  # B_PRICE_ONLY
+    for bad in ("買進", "賣出"):
+        assert bad not in h

@@ -30,15 +30,15 @@ jobs:
       - name: Test rebound rules
         run: python -m pytest -q tests
 
+      - name: Run TAIEX rebound tracker
+        env:
+          TZ: Asia/Taipei
+        run: python taiex_rebound.py || echo "TAIEX tracker failed, page keeps last card"
+
       - name: Run tracker
         env:
           TZ: Asia/Taipei
         run: python ma_tracker.py
-
-      - name: Run TAIEX rebound tracker
-        env:
-          TZ: Asia/Taipei
-        run: python taiex_rebound.py
 
       - name: Run industry map
         env:

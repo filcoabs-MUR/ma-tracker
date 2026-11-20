@@ -445,7 +445,7 @@ def write_html(df: pd.DataFrame, summ: pd.DataFrame, alerts: list[str],
 <title>主題股均線追蹤</title><style>{CSS}</style></head><body><div class="wrap">
 <header><h1>主題股均線追蹤</h1>
 <div class="sub">資料日 {data_date}｜更新 {now}（台北）｜紅＝在均線上、綠＝在均線下</div>
-<div class="nav"><a href="industry.html">美股行業地圖 →</a></div></header>
+<div class="nav"><a href="#taiex">台指年線反彈 ↓</a>　<a href="industry.html">美股行業地圖 →</a></div></header>
 <div class="stats">
 <div class="stat"><span>站上 50MA</span><b>{n50}<small> / {n_all}</small></b></div>
 <div class="stat"><span>符合條件</span><b class="acc">{n_ok}</b></div>
@@ -463,6 +463,14 @@ def write_html(df: pd.DataFrame, summ: pd.DataFrame, alerts: list[str],
                 f"<span>距50 <b class='{_cls(r['vs50'])}'>{r['vs50']:+.1f}%</b></span>"
                 f"<span>20日 <b class='{_cls(r['ret20'])}'>{r['ret20']:+.1f}%</b></span></div></div>")
         parts.append("</div>")
+
+    rb = OUT / "taiex_rebound.json"
+    if rb.exists():
+        try:
+            from taiex_rebound import to_html_card
+            parts.append(to_html_card(json.loads(rb.read_text(encoding="utf-8"))))
+        except Exception as ex:  # 卡片失敗不影響主頁
+            print(f"台指反彈卡片略過：{ex}")
 
     if alerts:
         parts.append('<div class="card alert"><h2>今日變化</h2><ul>' +

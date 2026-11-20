@@ -297,6 +297,45 @@ def to_markdown(r: Result, prev_scenario: str | None = None) -> str:
     ])
 
 
+PILL = {"C": "hv", "B": "ok", "ABOVE": "ok", "B_PRICE_ONLY": "md", "A": "md", "RALLY": "lt"}
+
+
+def to_html_card(d: dict) -> str:
+    """給 ma_tracker 網頁用的卡片（沿用 ma_tracker 的 CSS：card／idx／ix／pill／pos／neg）。"""
+    import html as _h
+
+    e = _h.escape
+    cls = lambda v: "pos" if v > 0 else "neg" if v < 0 else ""
+    lv = d["levels"]
+    flag = "<span class='pill ok'>追價確認日</span> " if d.get("ftd_today") else ""
+    rally = "尚未出現收漲日" if d.get("rally_day") is None else f"第 {d['rally_day']} 天"
+    ftd = "是" if d.get("ftd_today") else (f"已於 {e(d['ftd_date'])}" if d.get("ftd_date") else "否")
+    if not d.get("volume_available", True):
+        ftd += "（缺量能）"
+    oi = "未取得" if d.get("oi_today") is None else f"{d['oi_today']:,}（{d['oi_change']:+,}）"
+    tile = lambda t, c, sub: (f"<div class='ix'><div class='t'>{t}</div><div class='c'>{c}</div>"
+                              f"<div class='d'>{sub}</div></div>")
+    return (
+        f"<div class='card' id='taiex'><h2>台指年線反彈追蹤 <small>{e(d['as_of'])}</small></h2>"
+        f"<p>{flag}<span class='pill {PILL.get(d['scenario'], 'lt')}'>{e(d['scenario_text'])}</span> "
+        f"<span class='mut'>{e(d['reason'])}</span></p>"
+        "<div class='idx'>"
+        + tile("加權指數", f"{d['close']:,.0f}",
+               f"<span>今日 <b class='{cls(d['change_pct'])}'>{d['change_pct']:+.2f}%</b></span>")
+        + tile("年線 MA240", f"{d['ma240']:,.0f}",
+               f"<span>距年線 <b>{d['dist_ma240']:+,.0f}</b>（{d['dist_ma240_pct']:+.2f}%）</span>")
+        + tile("MA20 乖離", f"<span class='{cls(d['bias_ma20_pct'])}'>{d['bias_ma20_pct']:+.2f}%</span>",
+               f"<span>MA20 {d['ma20']:,.0f}／MA60 {d['ma60']:,.0f}</span>")
+        + tile("反彈天數", rally, f"<span>追價確認 {ftd}</span>")
+        + "</div>"
+        f"<p class='fn'>外資台指期淨空單：{oi}｜樞紐低點 {d['pivot_low']:,.0f}（{e(d['pivot_date'])}）<br>"
+        f"關鍵價位：年線 {d['ma240']:,.0f}／0.382 回撤 {lv['fib_0382']:,.0f}／前低 {lv['prior_low']:,.0f}／"
+        f"錨點低 {lv['anchor_low']:,.0f}／支撐區 {lv['support_zone'][0]:,.0f}～{lv['support_zone'][1]:,.0f}<br>"
+        "劇本：A 年線遇壓回測｜B 站穩年線 3 日且外資空單減少 1 萬口｜C 跌破錨點低點。"
+        "網頁版用 Yahoo ^TWII，無量能與籌碼；完整判讀以盤後排程（證交所資料）為準。僅數據整理，非投資建議。</p></div>"
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="台指年線反彈情境追蹤")
     ap.add_argument("--csv", help="自備日線 CSV（date,open,high,low,close,volume 或 turnover_billion）")
