@@ -187,3 +187,26 @@ def test_html_card_renders_and_escapes():
     assert "pill md" in h  # B_PRICE_ONLY
     for bad in ("買進", "賣出"):
         assert bad not in h
+
+
+def _card_dict(post, extra_after=0):
+    post = post + [(36500, 36000, 36200, None)] * extra_after
+    df, anchor = build(post)
+    r = tr.evaluate(df, anchor_date=anchor, anchor_low=ANCHOR_LOW)
+    d = json.loads(json.dumps(tr.asdict(r)))
+    d["series"] = tr.chart_series(df)
+    return d, anchor
+
+
+def test_chart_has_mas_and_scenarios_near_anchor():
+    d, anchor = _card_dict(ABOVE3)
+    svg = tr.to_svg_chart(d, anchor_date=anchor)
+    assert svg.count("<polyline") == 7  # 指數 + 3 均線 + 3 劇本
+    assert "#1baf7a" in svg and "nan" not in svg.lower()
+
+
+def test_chart_drops_scenarios_after_25_days():
+    d, anchor = _card_dict(ABOVE3, extra_after=30)
+    svg = tr.to_svg_chart(d, anchor_date=anchor)
+    assert svg.count("<polyline") == 4
+    assert "A 遇壓回測" not in svg

@@ -49,6 +49,13 @@ HOLD_DAYS = 3                  # 站穩天數 / 假突破判定天數
 OI_DROP_REQUIRED = 10_000      # 外資淨空單需減少口數
 FTD_MIN_PCT = 1.5
 FTD_DAY_RANGE = (4, 7)
+CHART_DAYS = 80                # 網頁圖表顯示天數
+# 劇本示意路徑：(錨點後第 k 個交易日, 點位)，只在錨點後 25 個交易日內顯示
+SCENARIO_PATHS = {
+    "A": [(0, 36033), (7, 39400), (17, 35600), (25, 37600)],
+    "B": [(0, 36033), (6, 39500), (12, 41300), (18, 40400), (25, 42500)],
+    "C": [(0, 36033), (4, 37300), (13, 33500), (25, 34600)],
+}
 
 SCENARIO_TEXT = {
     "C": "C 續跌：收盤跌破錨點低點",
@@ -297,6 +304,106 @@ def to_markdown(r: Result, prev_scenario: str | None = None) -> str:
     ])
 
 
+def chart_series(df: pd.DataFrame, n: int = CHART_DAYS) -> dict:
+    d = add_indicators(df).tail(n)
+    r = lambda col: [None if pd.isna(v) else round(float(v), 0) for v in d[col]]
+    return {"dates": [t.strftime("%Y-%m-%d") for t in d.index], "close": r("close"),
+            "ma20": r("ma20"), "ma60": r("ma60"), "ma240": r("ma240")}
+
+
+SVG_STYLE = {
+    "close": ("var(--fg)", 2.2, ""), "ma20": ("#eda100", 1.4, ""), "ma60": ("#e87ba4", 1.4, ""),
+    "ma240": ("#1baf7a", 2.4, ""), "A": ("#2563eb", 1.8, "6 4"), "B": ("#16a34a", 2.0, "2 3"),
+    "C": ("#d6312f", 1.8, "8 4"),
+}
+
+
+def _interp(pts: list[tuple[int, float]]) -> dict[int, float]:
+    out = {}
+    for (a, va), (b, vb) in zip(pts, pts[1:]):
+        for k in range(a, b + 1):
+            out[k] = va + (vb - va) * (k - a) / (b - a)
+    return out
+
+
+def to_svg_chart(d: dict, anchor_date: str | None = None) -> str:
+    """指數＋均線＋劇本示意線的 inline SVG（不需外部 JS，深色模式沿用頁面變數）。"""
+    s = d.get("series")
+    if not s or not s.get("dates"):
+        return ""
+    anchor_date = ANCHOR_DATE if anchor_date is None else anchor_date
+    dates, H = s["dates"], len(s["dates"])
+    ai = dates.index(anchor_date) if anchor_date in dates else None
+    after = H - 1 - ai if ai is not None else None
+    future = 0
+    scen = {}
+    if ai is not None and after <= 25:
+        future = 25 - after
+        for k, pts in SCENARIO_PATHS.items():
+            scen[k] = {ai + off: v for off, v in _interp(pts).items()}
+    N = H + future
+    lv = d["levels"]
+    hlines = [(lv["fib_0382"], "0.382"), (lv["prior_low"], "前低"), (lv["anchor_low"], "錨點")]
+    vals = [v for k in ("close", "ma20", "ma60", "ma240") for v in s[k] if v is not None]
+    vals += [v for m in scen.values() for v in m.values()] + [v for v, _ in hlines]
+    lo, hi = min(vals), max(vals)
+    pad = (hi - lo) * 0.06 or 100
+    lo, hi = lo - pad, hi + pad
+    W, Ht, L, R, T, B = 680, 300, 8, 118, 12, 26
+    X = lambda i: L + (W - L - R) * i / max(N - 1, 1)
+    Y = lambda v: T + (Ht - T - B) * (hi - v) / (hi - lo)
+
+    def line(pts: dict[int, float], key: str) -> str:
+        color, w, dash = SVG_STYLE[key]
+        xy = " ".join(f"{X(i):.1f},{Y(v):.1f}" for i, v in sorted(pts.items()) if v is not None)
+        if not xy:
+            return ""
+        da = f" stroke-dasharray='{dash}'" if dash else ""
+        return (f"<polyline points='{xy}' fill='none' stroke='{color}' stroke-width='{w}'"
+                f" stroke-linejoin='round' stroke-linecap='round'{da}/>")
+
+    g = []
+    for v, t in hlines:
+        if lo < v < hi:
+            g.append(f"<line x1='{L}' x2='{W - R}' y1='{Y(v):.1f}' y2='{Y(v):.1f}' stroke='var(--mut)'"
+                     f" stroke-opacity='.5' stroke-dasharray='3 3'/>"
+                     f"<text x='{W - R + 4}' y='{Y(v) + 5:.1f}' font-size='15' fill='var(--mut)'>{t} {v:,.0f}</text>")
+    if ai is not None:
+        g.append(f"<line x1='{X(ai):.1f}' x2='{X(ai):.1f}' y1='{T}' y2='{Ht - B}' stroke='var(--mut)' stroke-opacity='.35'/>")
+    for k in ("ma60", "ma20", "ma240"):
+        g.append(line(dict(enumerate(s[k])), k))
+    for k in ("A", "B", "C"):
+        if k in scen:
+            g.append(line(scen[k], k))
+    g.append(line(dict(enumerate(s["close"])), "close"))
+    last = s["close"][-1]
+    g.append(f"<circle cx='{X(H - 1):.1f}' cy='{Y(last):.1f}' r='3.5' fill='var(--fg)' stroke='var(--card)' stroke-width='2'/>")
+    ma = s["ma240"][-1]
+    if ma is not None:
+        g.append(f"<text x='{W - R + 4}' y='{Y(ma) + 5:.1f}' font-size='15' fill='#1baf7a'>年線 {ma:,.0f}</text>")
+    ticks = {0: dates[0][5:], H - 1: dates[-1][5:]}
+    if ai is not None and 6 < ai < H - 7:
+        ticks[ai] = dates[ai][5:]
+    if future:
+        ticks[N - 1] = f"+{future}日"
+    for i, t in ticks.items():
+        anchor = "start" if i == 0 else "end" if i == N - 1 else "middle"
+        g.append(f"<text x='{X(i):.1f}' y='{Ht - 6}' font-size='15' fill='var(--mut)' text-anchor='{anchor}'>{t}</text>")
+
+    def key(color, dash, label, w=2):
+        da = f" stroke-dasharray='{dash}'" if dash else ""
+        return (f"<span style='display:inline-flex;align-items:center;gap:4px;margin-right:10px;white-space:nowrap'>"
+                f"<svg width='18' height='6'><line x1='0' x2='18' y1='3' y2='3' stroke='{color}' stroke-width='{w}'{da}/></svg>{label}</span>")
+    legend = ("<div class='fn' style='margin-top:6px'>" + key("var(--fg)", "", "指數") + key("#eda100", "", "MA20")
+              + key("#e87ba4", "", "MA60") + key("#1baf7a", "", "年線 MA240", 3)
+              + (key("#2563eb", "6 4", "A 遇壓回測") + key("#16a34a", "2 3", "B V型") + key("#d6312f", "8 4", "C 續跌") if scen else "")
+              + "</div>")
+    return (legend + f"<svg viewBox='0 0 {W} {Ht}' width='100%' role='img' "
+            f"aria-label='加權指數近 {H} 日與 MA20、MA60、年線走勢' style='display:block;margin-top:4px'>"
+            + "".join(g) + "</svg>"
+            + ("<p class='fn' style='margin-top:2px'>劇本線為 11/20 當天畫的示意路徑，不是預測；錨點後 25 個交易日自動移除。</p>" if scen else ""))
+
+
 PILL = {"C": "hv", "B": "ok", "ABOVE": "ok", "B_PRICE_ONLY": "md", "A": "md", "RALLY": "lt"}
 
 
@@ -319,7 +426,8 @@ def to_html_card(d: dict) -> str:
         f"<div class='card' id='taiex'><h2>台指年線反彈追蹤 <small>{e(d['as_of'])}</small></h2>"
         f"<p>{flag}<span class='pill {PILL.get(d['scenario'], 'lt')}'>{e(d['scenario_text'])}</span> "
         f"<span class='mut'>{e(d['reason'])}</span></p>"
-        "<div class='idx'>"
+        + to_svg_chart(d)
+        + "<div class='idx'>"
         + tile("加權指數", f"{d['close']:,.0f}",
                f"<span>今日 <b class='{cls(d['change_pct'])}'>{d['change_pct']:+.2f}%</b></span>")
         + tile("年線 MA240", f"{d['ma240']:,.0f}",
@@ -360,7 +468,7 @@ def main(argv: list[str] | None = None) -> int:
                 prev = old.get("prev_scenario")
         except (json.JSONDecodeError, OSError):
             prev = None
-    payload = asdict(r) | {"prev_scenario": prev}
+    payload = asdict(r) | {"prev_scenario": prev, "series": chart_series(df)}
     jpath.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     md = to_markdown(r, prev)
     (out / "taiex_rebound.md").write_text(md + "\n", encoding="utf-8")
