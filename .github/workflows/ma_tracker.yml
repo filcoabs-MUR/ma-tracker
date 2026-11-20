@@ -25,12 +25,20 @@ jobs:
           cache: pip
 
       - name: Install
-        run: pip install -r requirements.txt
+        run: pip install -r requirements.txt pytest
+
+      - name: Test rebound rules
+        run: python -m pytest -q tests
 
       - name: Run tracker
         env:
           TZ: Asia/Taipei
         run: python ma_tracker.py
+
+      - name: Run TAIEX rebound tracker
+        env:
+          TZ: Asia/Taipei
+        run: python taiex_rebound.py
 
       - name: Run industry map
         env:
