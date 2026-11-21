@@ -82,6 +82,9 @@ WATCHLIST: dict[str, dict[str, str]] = {
     "軟體/資安/Agent": {
         "PLTR": "Palantir", "NET": "Cloudflare", "CRWD": "CrowdStrike", "PANW": "Palo Alto",
     },
+    "AI雲/模型": {
+        "CRWV": "CoreWeave", "ANT": "Anthropic",
+    },
     "大型科技CSP": {
         "MSFT": "Microsoft", "AAPL": "Apple", "AMZN": "Amazon", "GOOG": "Google", "META": "Meta",
         "TSLA": "Tesla",
@@ -431,7 +434,7 @@ def saas_section(df: pd.DataFrame) -> tuple[str, str]:
 
 
 def write_html(df: pd.DataFrame, summ: pd.DataFrame, alerts: list[str],
-               failed: list[str], path: Path) -> None:
+               failed: list[str], path: Path, young: list[str] | None = None) -> None:
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
     esc = html.escape
     stocks = df[df["category"] != "指數"]
@@ -535,6 +538,8 @@ def write_html(df: pd.DataFrame, summ: pd.DataFrame, alerts: list[str],
 出貨：近 25 日收黑且量增的天數。量比：近 5 日均量 ÷ 前 50 日均量。<br>
 賣壓輕＝站上 50MA；賣壓中＝跌破 50MA；賣壓重＝跌破 50MA 且 50MA 下彎、距一年高點跌逾 30%。<br>
 符合條件＝站上 50MA 且 RSI14 &lt; 70，僅為篩選條件，非買賣建議。</p></details>""")
+    if young:
+        parts.append(f"<p class='mut'>上市未滿 70 個交易日，暫不計算均線：{esc('、'.join(young))}</p>")
     if failed:
         parts.append(f"<p class='mut'>抓取失敗：{esc(', '.join(failed))}</p>")
     parts.append("<footer>資料：Yahoo Finance｜<a href='latest.csv'>下載 CSV</a>｜"
@@ -557,11 +562,14 @@ def main() -> int:
     print(f"抓取 {len(tickers)} 檔 ...")
     data = fetch_all(tickers)
 
-    rows, failed = [], []
+    rows, failed, young = [], [], []
     for cat, t, n in meta:
         m = metrics(data[t]) if t in data else None
         if m is None:
-            failed.append(t)
+            if t in data and len(data[t]) < 70:  # 新上市，資料天數不夠算均線
+                young.append(f"{n}({t}) 上市 {len(data[t])} 日")
+            else:
+                failed.append(t)
             continue
         rows.append({"category": cat, "ticker": t, "name": n, **m})
     if not rows:
@@ -589,7 +597,7 @@ def main() -> int:
         (OUT / f"alerts_{today}.txt").write_text("\n".join(alerts), encoding="utf-8")
 
     html_path = OUT / "latest.html"
-    write_html(df, summ, alerts, failed, html_path)
+    write_html(df, summ, alerts, failed, html_path, young)
 
     # console
     pd.set_option("display.width", 200)
@@ -602,6 +610,8 @@ def main() -> int:
     if alerts:
         print("\n== 今日變化 ==")
         print("\n".join(alerts))
+    if young:
+        print(f"\n上市未滿 70 日：{'、'.join(young)}")
     if failed:
         print(f"\n抓取失敗：{', '.join(failed)}")
     print(f"\nHTML：{html_path}")
