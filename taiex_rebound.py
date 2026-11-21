@@ -527,6 +527,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--oi-anchor", type=int, help="錨點日外資台指期淨空單（口，正數）")
     ap.add_argument("--oi-today", type=int, help="今日外資台指期淨空單（口，正數）")
     ap.add_argument("--out", default="output", help="輸出資料夾")
+    ap.add_argument("--hy", type=float, help="美國高收益債 OAS（%，FRED BAMLH0A0HYM2）；僅私人通知用")
+    ap.add_argument("--hy-20d", type=float, help="20 個交易日前的 HY OAS（%）")
+    ap.add_argument("--ccc", type=float, help="CCC 級 OAS（%，FRED BAMLH0A3HYC）")
     a = ap.parse_args(argv)
 
     if a.csv:
@@ -555,6 +558,13 @@ def main(argv: list[str] | None = None) -> int:
     payload = asdict(r) | {"prev_scenario": prev, "series": chart_series(df), "source": source}
     jpath.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     md = to_markdown(r, prev)
+    if a.hy is not None:  # ICE 數據僅供個人使用：只進 md／json，不進網頁卡片
+        from credit_spread import assess, to_markdown as credit_md
+
+        c = assess(a.hy, a.hy_20d, a.ccc)
+        payload["credit"] = asdict(c)
+        jpath.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        md = md.replace("\n\n僅為數據與規則判讀", "\n\n" + credit_md(c) + "\n\n僅為數據與規則判讀")
     (out / "taiex_rebound.md").write_text(md + "\n", encoding="utf-8")
     print(md)
     return 0
