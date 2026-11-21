@@ -259,6 +259,7 @@ def test_fetch_twse_merges_months_with_volume():
 def test_main_falls_back_to_yahoo(tmp_path, monkeypatch):
     df, anchor = build(ABOVE3)
     monkeypatch.setattr(tr, "fetch_twse", lambda: (_ for _ in ()).throw(RuntimeError("down")))
+    monkeypatch.setattr(tr, "fetch_finmind", lambda: (_ for _ in ()).throw(RuntimeError("down")))
     monkeypatch.setattr(tr, "fetch_yf", lambda: df)
     monkeypatch.setattr(tr, "ANCHOR_DATE", anchor)
     monkeypatch.setattr(tr, "ANCHOR_LOW", ANCHOR_LOW)
@@ -266,3 +267,40 @@ def test_main_falls_back_to_yahoo(tmp_path, monkeypatch):
     d = json.loads((tmp_path / "taiex_rebound.json").read_text(encoding="utf-8"))
     assert d["source"] == "yahoo"
     assert "備援" in tr.to_html_card(d)
+
+
+# ---- FinMind（欄位與數值取自 2026-11-18～20 實際回應）---------------------------
+FINMIND_JS = {"msg": "success", "data": [
+    {"date": "2026-11-18", "stock_id": "TAIEX", "Trading_Volume": 13560477251, "Trading_money": 1075174308798,
+     "open": 40720.09, "max": 40938.20, "min": 39260.99, "close": 40194.91, "spread": 102.80, "Trading_turnover": 5047336},
+    {"date": "2026-11-20", "stock_id": "TAIEX", "Trading_Volume": 17086212904, "Trading_money": 935310420150,
+     "open": 37646.13, "max": 37646.13, "min": 35738.68, "close": 36033.29, "spread": -2393.60, "Trading_turnover": 8039739},
+]}
+
+
+def test_parse_finmind_maps_max_min_and_money():
+    df = tr.parse_finmind(FINMIND_JS)
+    last = df.iloc[-1]
+    assert last["high"] == 37646.13 and last["low"] == 35738.68
+    assert last["volume"] == pytest.approx(9353.10, abs=0.01)  # 億
+
+
+def test_parse_finmind_error_raises():
+    with pytest.raises(ValueError):
+        tr.parse_finmind({"msg": "Your level is register", "data": []})
+
+
+def test_auto_uses_finmind_when_twse_fails(monkeypatch):
+    df, _ = build(ABOVE3)
+    monkeypatch.setattr(tr, "fetch_twse", lambda: (_ for _ in ()).throw(RuntimeError("403")))
+    monkeypatch.setattr(tr, "fetch_finmind", lambda: df)
+    monkeypatch.setattr(tr, "fetch_yf", lambda: pytest.fail("不該用到 Yahoo"))
+    got, src = tr.load_auto()
+    assert src == "finmind" and len(got) == len(df)
+
+
+def test_explicit_source_does_not_fall_back(monkeypatch):
+    monkeypatch.setattr(tr, "fetch_finmind", lambda: (_ for _ in ()).throw(RuntimeError("down")))
+    monkeypatch.setattr(tr, "fetch_yf", lambda: pytest.fail("指定來源時不該退回"))
+    with pytest.raises(RuntimeError):
+        tr.load_auto("finmind")

@@ -185,6 +185,38 @@ def fetch_twse(months: int = 14, get=None, pause: float = 1.5, today: pd.Timesta
     return normalize(df)
 
 
+# ---- FinMind（證交所 API 在海外主機失敗時的主要備援；不需 token）------------------
+FINMIND_URL = "https://api.finmindtrade.com/api/v4/data"
+
+
+def parse_finmind(js: dict) -> pd.DataFrame:
+    if js.get("msg") != "success" or not js.get("data"):
+        raise ValueError(f"FinMind 無資料：{js.get('msg')}")
+    df = pd.DataFrame(js["data"])
+    df = df.rename(columns={"max": "high", "min": "low"})
+    df["volume"] = df["Trading_money"].astype(float) / 1e8  # 元 → 億
+    df["date"] = pd.to_datetime(df["date"])
+    return normalize(df.set_index("date"))
+
+
+def fetch_finmind(days: int = 450, get=None, today: pd.Timestamp | None = None) -> pd.DataFrame:
+    import os
+
+    today = pd.Timestamp.today().normalize() if today is None else today
+    params = {"dataset": "TaiwanStockPrice", "data_id": "TAIEX",
+              "start_date": (today - pd.Timedelta(days=days)).strftime("%Y-%m-%d")}
+    if os.environ.get("FINMIND_TOKEN"):
+        params["token"] = os.environ["FINMIND_TOKEN"]
+    if get is None:
+        import requests
+
+        def get(p):
+            r = requests.get(FINMIND_URL, params=p, timeout=30)
+            r.raise_for_status()
+            return r.json()
+    return parse_finmind(get(params))
+
+
 def normalize(df: pd.DataFrame) -> pd.DataFrame:
     need = ["open", "high", "low", "close"]
     missing = [c for c in need if c not in df.columns]
@@ -475,9 +507,10 @@ def to_svg_chart(d: dict, anchor_date: str | None = None) -> str:
 
 
 SOURCE_NOTE = {
+    "finmind": "資料：FinMind（證交所開放資料，含成交金額）；網頁未含外資期貨籌碼，B 劇本最多判到「價格達標」，完整判讀見盤後排程。",
     "twse": "資料：證交所（含成交金額）；網頁未含外資期貨籌碼，B 劇本最多判到「價格達標」，完整判讀見盤後排程。",
     "csv": "資料：自備日線。",
-    "yahoo": "資料：Yahoo ^TWII（證交所 API 當日失敗時的備援，無量能與籌碼）；完整判讀以盤後排程為準。",
+    "yahoo": "資料：Yahoo ^TWII（證交所與 FinMind 當日都失敗時的備援，無量能與籌碼）；完整判讀以盤後排程為準。",
 }
 
 PILL = {"C": "hv", "B": "ok", "ABOVE": "ok", "B_PRICE_ONLY": "md", "A": "md", "RALLY": "lt"}
@@ -521,11 +554,27 @@ def to_html_card(d: dict) -> str:
     )
 
 
+def load_auto(source: str = "auto") -> tuple[pd.DataFrame, str]:
+    """依序嘗試證交所 → FinMind → Yahoo；指定來源時只用該來源（失敗就報錯）。"""
+    fetchers = {"twse": lambda: fetch_twse(), "finmind": lambda: fetch_finmind(), "yahoo": lambda: fetch_yf()}
+    order = ["twse", "finmind", "yahoo"] if source == "auto" else [source]
+    last = None
+    for name in order:
+        try:
+            return fetchers[name](), name
+        except Exception as ex:
+            last = ex
+            print(f"{name} 失敗：{type(ex).__name__} {ex}")
+    raise RuntimeError(f"所有資料來源都失敗：{last}")
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="台指年線反彈情境追蹤")
     ap.add_argument("--csv", help="自備日線 CSV（date,open,high,low,close,volume 或 turnover_billion）")
     ap.add_argument("--oi-anchor", type=int, help="錨點日外資台指期淨空單（口，正數）")
     ap.add_argument("--oi-today", type=int, help="今日外資台指期淨空單（口，正數）")
+    ap.add_argument("--source", default="auto", choices=["auto", "twse", "finmind", "yahoo"],
+                    help="資料來源；auto = 證交所 → FinMind → Yahoo")
     ap.add_argument("--out", default="output", help="輸出資料夾")
     ap.add_argument("--hy", type=float, help="美國高收益債 OAS（%，FRED BAMLH0A0HYM2）；僅私人通知用")
     ap.add_argument("--hy-20d", type=float, help="20 個交易日前的 HY OAS（%）")
@@ -535,11 +584,7 @@ def main(argv: list[str] | None = None) -> int:
     if a.csv:
         df, source = load_csv(a.csv), "csv"
     else:
-        try:
-            df, source = fetch_twse(), "twse"
-        except Exception as ex:  # 證交所失敗才退回 Yahoo
-            print(f"證交所 API 失敗，改用 Yahoo：{ex}")
-            df, source = fetch_yf(), "yahoo"
+        df, source = load_auto(a.source)
     r = evaluate(df, a.oi_anchor, a.oi_today)
 
     out = Path(a.out)
